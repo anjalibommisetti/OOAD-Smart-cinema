@@ -1,156 +1,424 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Smart Cinema — Book Tickets Online</title>
-  <meta name="description" content="Smart Cinema is a modern online ticket booking system. Browse movies, select seats, and book in seconds." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <meta name="description" content="Smart Cinema: A complete OOP-based cinema ticket booking system. Browse movies, select seats, and book tickets instantly."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-<!-- ── NAV ── -->
-<header class="navbar" id="navbar">
+<!-- ════════════════════════════════════════
+     SPLASH SCREEN
+════════════════════════════════════════ -->
+<div id="view-splash" class="view active">
+  <div class="splash-bg"></div>
+  <div class="splash-content">
+    <div class="splash-logo">
+      <div class="splash-icon">🎬</div>
+      <h1 class="splash-title">Smart<span class="gold">Cinema</span></h1>
+      <p class="splash-sub">Object-Oriented Ticket Booking System</p>
+    </div>
+    <div class="splash-loader"><div class="loader-bar"></div></div>
+    <p class="splash-version">v2.0 · OOAD Final Year Project</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     NAVBAR (shared across app)
+════════════════════════════════════════ -->
+<header class="navbar hidden" id="main-navbar">
   <div class="nav-inner">
-    <div class="logo">
+    <div class="logo" onclick="navigate('home')" style="cursor:pointer">
       <span class="logo-icon">🎬</span>
       <span class="logo-text">Smart<span class="gold">Cinema</span></span>
     </div>
-    <nav class="nav-links">
-      <a href="#" class="nav-link active" data-view="home">Movies</a>
-      <a href="#" class="nav-link" data-view="my-bookings">My Bookings</a>
+    <nav class="nav-links" id="nav-links">
+      <a class="nav-link" data-nav="home">🏠 Home</a>
+      <a class="nav-link" data-nav="history">🎟 My Bookings</a>
+      <a class="nav-link" data-nav="profile">👤 Profile</a>
+      <a class="nav-link admin-only hidden" data-nav="admin">⚙️ Admin</a>
     </nav>
-    <button class="btn-register" id="btn-open-register">
-      <span id="user-label">Register / Login</span>
-    </button>
+    <div class="nav-actions">
+      <span class="nav-user" id="nav-user-name"></span>
+      <button class="btn-logout" id="btn-logout" onclick="authLogout()">Logout</button>
+    </div>
   </div>
 </header>
 
-<!-- ── HERO ── -->
-<section class="hero" id="view-home">
-  <div class="hero-bg"></div>
-  <div class="hero-content">
-    <p class="hero-tag">Now Showing</p>
-    <h1 class="hero-title">Experience Cinema<br><span class="gold">Like Never Before</span></h1>
-    <p class="hero-sub">Premium seating · Dolby sound · Seamless booking</p>
-    <a href="#movies" class="btn-hero">Browse Movies</a>
-  </div>
-  <div class="hero-orbs">
-    <div class="orb orb1"></div>
-    <div class="orb orb2"></div>
-    <div class="orb orb3"></div>
-  </div>
-</section>
+<!-- ════════════════════════════════════════
+     AUTH — LOGIN / REGISTER
+════════════════════════════════════════ -->
+<div id="view-auth" class="view hidden">
+  <div class="auth-bg"></div>
+  <div class="auth-container">
+    <div class="auth-left">
+      <div class="auth-brand">
+        <span class="logo-icon">🎬</span>
+        <h2 class="auth-brand-title">Smart<span class="gold">Cinema</span></h2>
+      </div>
+      <h1 class="auth-headline">Your Premium<br/><span class="gold">Cinema Experience</span></h1>
+      <ul class="auth-perks">
+        <li>🎭 Browse 100+ movies</li>
+        <li>💺 Interactive seat selection</li>
+        <li>⚡ Instant booking confirmation</li>
+        <li>🎟 Digital ticket generation</li>
+      </ul>
+    </div>
+    <div class="auth-right">
+      <!-- Tab switcher -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Login</button>
+        <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</button>
+      </div>
 
-<!-- ── MOVIES GRID ── -->
-<section class="section" id="movies">
+      <!-- LOGIN FORM -->
+      <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+        <h3 class="form-title">Welcome Back 👋</h3>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="login-email" placeholder="you@example.com" required/>
+          <span class="field-err" id="err-login-email"></span>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="pass-wrap">
+            <input type="password" id="login-password" placeholder="Enter password" required/>
+            <button type="button" class="eye-btn" onclick="togglePass('login-password')">👁</button>
+          </div>
+          <span class="field-err" id="err-login-pass"></span>
+        </div>
+        <button type="submit" class="btn-primary full" id="btn-login-submit">Login →</button>
+        <p class="auth-hint">Admin? Use <strong>admin@smartcinema.com / admin123</strong></p>
+      </form>
+
+      <!-- REGISTER FORM -->
+      <form id="register-form" class="auth-form hidden" onsubmit="handleRegister(event)">
+        <h3 class="form-title">Create Account 🍿</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" id="reg-fname" placeholder="Anjali" required/>
+            <span class="field-err" id="err-fname"></span>
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" id="reg-lname" placeholder="Bommisetti"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="reg-email" placeholder="you@example.com" required/>
+          <span class="field-err" id="err-reg-email"></span>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="reg-phone" placeholder="9876543210" maxlength="10" required/>
+          <span class="field-err" id="err-phone"></span>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="pass-wrap">
+            <input type="password" id="reg-password" placeholder="Min 6 characters" required/>
+            <button type="button" class="eye-btn" onclick="togglePass('reg-password')">👁</button>
+          </div>
+          <div class="pass-strength" id="pass-strength"></div>
+          <span class="field-err" id="err-reg-pass"></span>
+        </div>
+        <button type="submit" class="btn-primary full">Create Account →</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     HOME — MOVIES LISTING
+════════════════════════════════════════ -->
+<div id="view-home" class="view hidden page-view">
+
+  <!-- Hero banner -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <p class="hero-tag">🎬 Now Showing</p>
+      <h1 class="hero-title">Lights. Camera.<br/><span class="gold">Action!</span></h1>
+      <p class="hero-sub">Book premium seats · Live seat availability · Instant e-ticket</p>
+    </div>
+    <div class="hero-orbs">
+      <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+    </div>
+  </section>
+
+  <!-- Search & Filter -->
+  <section class="filter-bar">
+    <div class="container">
+      <input class="search-input" id="search-input" type="text" placeholder="🔍 Search movies, genres..." oninput="filterMovies()"/>
+      <div class="filter-chips" id="filter-chips">
+        <button class="chip active" onclick="setGenre('All', this)">All</button>
+        <button class="chip" onclick="setGenre('Action', this)">Action</button>
+        <button class="chip" onclick="setGenre('Drama', this)">Drama</button>
+        <button class="chip" onclick="setGenre('Sci-Fi', this)">Sci-Fi</button>
+        <button class="chip" onclick="setGenre('Comedy', this)">Comedy</button>
+        <button class="chip" onclick="setGenre('Thriller', this)">Thriller</button>
+        <button class="chip" onclick="setGenre('Romance', this)">Romance</button>
+        <button class="chip" onclick="setGenre('Horror', this)">Horror</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Movies Grid -->
+  <section class="section">
+    <div class="container">
+      <div class="movies-grid" id="movies-grid"></div>
+      <div class="no-results hidden" id="no-results">
+        <div class="nr-icon">🎭</div>
+        <p>No movies found. Try a different search.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════════════════════
+     MOVIE DETAIL
+════════════════════════════════════════ -->
+<div id="view-movie-detail" class="view hidden page-view">
   <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">Now Showing</h2>
-      <p class="section-sub">Select a movie to view showtimes</p>
-    </div>
-    <div class="movies-grid" id="movies-grid"></div>
+    <button class="btn-back" onclick="navigate('home')">← Back to Movies</button>
+    <div id="movie-detail-content"></div>
   </div>
-</section>
+</div>
 
-<!-- ── MODAL: REGISTER ── -->
-<div class="modal-overlay" id="modal-register">
-  <div class="modal glass">
-    <button class="modal-close" data-close="modal-register">✕</button>
-    <h2 class="modal-title">👤 Your Profile</h2>
-    <div id="register-form-area">
-      <p class="modal-desc">Enter your details to book tickets</p>
-      <div class="form-group">
-        <label>Full Name</label>
-        <input type="text" id="input-name" placeholder="e.g. Anjali Bommisetti" />
-      </div>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="input-email" placeholder="e.g. anjali@email.com" />
-      </div>
-      <button class="btn-primary full" id="btn-register">Continue →</button>
+<!-- ════════════════════════════════════════
+     THEATRE SELECTION
+════════════════════════════════════════ -->
+<div id="view-theatre" class="view hidden page-view">
+  <div class="container">
+    <button class="btn-back" onclick="history.go(-1)">← Back</button>
+    <h2 class="page-title">Select Theatre & Show</h2>
+    <p class="page-sub" id="theatre-movie-name"></p>
+    <div id="theatre-list"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SEAT SELECTION
+════════════════════════════════════════ -->
+<div id="view-seats" class="view hidden page-view">
+  <div class="container">
+    <button class="btn-back" onclick="navigate('theatre')">← Back</button>
+    <div id="seat-selection-content"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAYMENT
+════════════════════════════════════════ -->
+<div id="view-payment" class="view hidden page-view">
+  <div class="container narrow">
+    <button class="btn-back" onclick="navigate('seats')">← Back</button>
+    <h2 class="page-title">💳 Payment</h2>
+    <div id="payment-content"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     BOOKING CONFIRMATION
+════════════════════════════════════════ -->
+<div id="view-confirmation" class="view hidden page-view">
+  <div class="container narrow">
+    <div id="confirmation-content"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     DIGITAL TICKET
+════════════════════════════════════════ -->
+<div id="view-ticket" class="view hidden page-view">
+  <div class="container narrow">
+    <div id="ticket-content"></div>
+    <div class="ticket-actions">
+      <button class="btn-primary" onclick="navigate('history')">My Bookings</button>
+      <button class="btn-outline" onclick="printTicket()">🖨 Print Ticket</button>
+      <button class="btn-outline" onclick="navigate('home')">Book Another</button>
     </div>
-    <div id="register-info-area" style="display:none">
-      <div class="profile-card">
-        <div class="profile-avatar" id="profile-avatar"></div>
-        <div>
-          <p class="profile-name" id="profile-name"></p>
-          <p class="profile-email" id="profile-email-display"></p>
-          <p class="profile-id" id="profile-id"></p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     BOOKING HISTORY
+════════════════════════════════════════ -->
+<div id="view-history" class="view hidden page-view">
+  <div class="container">
+    <h2 class="page-title">🎟 My Bookings</h2>
+    <div id="history-content"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     USER PROFILE
+════════════════════════════════════════ -->
+<div id="view-profile" class="view hidden page-view">
+  <div class="container narrow">
+    <h2 class="page-title">👤 My Profile</h2>
+    <div id="profile-content"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     ADMIN DASHBOARD
+════════════════════════════════════════ -->
+<div id="view-admin" class="view hidden page-view">
+  <div class="container">
+    <h2 class="page-title">⚙️ Admin Dashboard</h2>
+
+    <!-- Admin Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchAdminTab('overview', this)">📊 Overview</button>
+      <button class="admin-tab" onclick="switchAdminTab('movies', this)">🎬 Movies</button>
+      <button class="admin-tab" onclick="switchAdminTab('theatres', this)">🏟 Theatres</button>
+      <button class="admin-tab" onclick="switchAdminTab('bookings', this)">📋 Bookings</button>
+      <button class="admin-tab" onclick="switchAdminTab('users', this)">👥 Users</button>
+      <button class="admin-tab" onclick="switchAdminTab('reports', this)">📈 Reports</button>
+    </div>
+
+    <div id="admin-overview" class="admin-panel active">
+      <div class="stat-cards" id="admin-stats"></div>
+    </div>
+    <div id="admin-movies" class="admin-panel">
+      <div id="admin-movies-content"></div>
+    </div>
+    <div id="admin-theatres" class="admin-panel">
+      <div id="admin-theatres-content"></div>
+    </div>
+    <div id="admin-bookings" class="admin-panel">
+      <div id="admin-bookings-content"></div>
+    </div>
+    <div id="admin-users" class="admin-panel">
+      <div id="admin-users-content"></div>
+    </div>
+    <div id="admin-reports" class="admin-panel">
+      <div id="admin-reports-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     MODAL — Add / Edit Movie
+════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-movie">
+  <div class="modal glass">
+    <button class="modal-close" onclick="closeModal('modal-movie')">✕</button>
+    <h3 class="modal-title" id="movie-modal-title">Add Movie</h3>
+    <form id="movie-form" onsubmit="saveMovie(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Movie Title *</label>
+          <input type="text" id="m-title" required/>
+        </div>
+        <div class="form-group">
+          <label>Genre *</label>
+          <select id="m-genre" required>
+            <option value="">Select</option>
+            <option>Action</option><option>Drama</option><option>Sci-Fi</option>
+            <option>Comedy</option><option>Thriller</option><option>Romance</option><option>Horror</option>
+          </select>
         </div>
       </div>
-      <button class="btn-outline full" id="btn-logout">Logout</button>
-    </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Language</label>
+          <input type="text" id="m-lang" placeholder="Telugu, Hindi, English"/>
+        </div>
+        <div class="form-group">
+          <label>Duration (min) *</label>
+          <input type="number" id="m-duration" min="60" max="240" required/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Release Date</label>
+          <input type="date" id="m-release"/>
+        </div>
+        <div class="form-group">
+          <label>Rating</label>
+          <select id="m-rating">
+            <option>U</option><option>UA</option><option>A</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Base Price (₹)</label>
+          <input type="number" id="m-price" min="50" value="150"/>
+        </div>
+        <div class="form-group">
+          <label>Emoji Poster</label>
+          <input type="text" id="m-emoji" placeholder="🎬" maxlength="4"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="m-desc" rows="2" placeholder="Brief synopsis..."></textarea>
+      </div>
+      <input type="hidden" id="m-edit-id"/>
+      <button type="submit" class="btn-primary full mt">Save Movie</button>
+    </form>
   </div>
 </div>
 
-<!-- ── MODAL: SHOWTIMES ── -->
-<div class="modal-overlay" id="modal-showtimes">
-  <div class="modal glass wide">
-    <button class="modal-close" data-close="modal-showtimes">✕</button>
-    <div id="showtimes-content"></div>
-  </div>
-</div>
-
-<!-- ── MODAL: SEATS ── -->
-<div class="modal-overlay" id="modal-seats">
-  <div class="modal glass wide">
-    <button class="modal-close" data-close="modal-seats">✕</button>
-    <div id="seats-content"></div>
-  </div>
-</div>
-
-<!-- ── MODAL: PAYMENT ── -->
-<div class="modal-overlay" id="modal-payment">
+<!-- ════════════════════════════════════════
+     MODAL — Add Theatre
+════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-theatre">
   <div class="modal glass">
-    <button class="modal-close" data-close="modal-payment">✕</button>
-    <h2 class="modal-title">💳 Payment</h2>
-    <div id="payment-summary"></div>
-    <div class="payment-methods">
-      <label class="pay-option" id="pay-card">
-        <input type="radio" name="pay" value="card" checked />
-        <span class="pay-icon">💳</span>
-        <span>Credit / Debit Card</span>
-      </label>
-      <label class="pay-option" id="pay-upi">
-        <input type="radio" name="pay" value="upi" />
-        <span class="pay-icon">📱</span>
-        <span>UPI / GPay / PhonePe</span>
-      </label>
-    </div>
-    <button class="btn-primary full" id="btn-confirm-payment">Pay & Confirm Booking</button>
+    <button class="modal-close" onclick="closeModal('modal-theatre')">✕</button>
+    <h3 class="modal-title">Add Theatre</h3>
+    <form onsubmit="saveTheatre(event)">
+      <div class="form-group">
+        <label>Theatre Name *</label>
+        <input type="text" id="t-name" required placeholder="e.g. PVR Cinemas"/>
+      </div>
+      <div class="form-group">
+        <label>Location *</label>
+        <input type="text" id="t-location" required placeholder="e.g. Hyderabad, Gachibowli"/>
+      </div>
+      <div class="form-group">
+        <label>Number of Screens</label>
+        <input type="number" id="t-screens" min="1" max="10" value="3"/>
+      </div>
+      <button type="submit" class="btn-primary full mt">Add Theatre</button>
+    </form>
   </div>
 </div>
 
-<!-- ── MODAL: RECEIPT ── -->
-<div class="modal-overlay" id="modal-receipt">
-  <div class="modal glass">
-    <button class="modal-close" data-close="modal-receipt">✕</button>
-    <div id="receipt-content"></div>
+<!-- ════════════════════════════════════════
+     MODAL — Payment Processing
+════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-processing">
+  <div class="modal glass" style="text-align:center">
+    <div class="processing-icon">⏳</div>
+    <h3>Processing Payment...</h3>
+    <p style="color:var(--text-dim);margin-top:8px">Please wait, do not refresh the page.</p>
+    <div class="proc-bar"><div class="proc-fill" id="proc-fill"></div></div>
   </div>
 </div>
 
-<!-- ── MY BOOKINGS VIEW ── -->
-<section class="section hidden" id="view-my-bookings">
-  <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">My Bookings</h2>
-      <p class="section-sub">View and manage your tickets</p>
-    </div>
-    <div id="bookings-list"></div>
-  </div>
-</section>
-
-<!-- ── TOAST ── -->
+<!-- ════════════════════════════════════════
+     TOAST NOTIFICATIONS
+════════════════════════════════════════ -->
 <div class="toast" id="toast"></div>
 
-<!-- ── FOOTER ── -->
-<footer class="footer">
+<!-- ════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════ -->
+<footer class="footer hidden" id="main-footer">
   <div class="footer-inner">
     <span class="logo-text">🎬 Smart<span class="gold">Cinema</span></span>
-    <p>Built with OOP principles &amp; modern web design · OOAD Project</p>
+    <p>OOAD Final Year Project · Built with OOP Principles</p>
+    <p style="font-size:11px;margin-top:6px;color:#555">© 2026 SmartCinema. All rights reserved.</p>
   </div>
 </footer>
 
