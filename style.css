@@ -1033,6 +1033,154 @@ body {
 }
 
 /* ── ANIMATIONS ── */
+/* ── LOCATION SELECTOR & ENHANCED THEATRE & SEAT STYLES ── */
+.nav-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg3);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 4px 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.nav-location:hover {
+  border-color: var(--gold);
+  box-shadow: 0 0 12px rgba(245, 197, 24, 0.2);
+}
+.loc-icon { font-size: 16px; }
+.city-select-dropdown {
+  background: transparent;
+  border: none;
+  color: var(--gold);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+  padding: 4px 0;
+}
+.city-select-dropdown option {
+  background: var(--bg2);
+  color: var(--text);
+  font-weight: 500;
+}
+.btn-detect-loc {
+  background: rgba(245, 197, 24, 0.12);
+  color: var(--gold);
+  border: 1px solid rgba(245, 197, 24, 0.3);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-detect-loc:hover {
+  background: var(--gold);
+  color: #000;
+}
+
+.hero-badge-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.hero-location-badge {
+  background: var(--bg2);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 50px;
+}
+
+.trending-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #ff4757, #ff6b81);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4);
+  z-index: 2;
+}
+
+.theatre-badge-flex {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.theatre-distance-pill {
+  background: rgba(30, 144, 255, 0.12);
+  color: var(--blue);
+  border: 1px solid rgba(30, 144, 255, 0.3);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+.theatre-screen-pill {
+  background: rgba(112, 161, 255, 0.1);
+  color: var(--purple);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+/* Show status indicators */
+.show-chip {
+  position: relative;
+  min-width: 120px;
+}
+.show-status-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-top: 4px;
+  display: inline-block;
+}
+.show-status-tag.avail { background: rgba(46, 213, 115, 0.15); color: var(--green); }
+.show-status-tag.fast { background: rgba(245, 197, 24, 0.18); color: var(--gold); }
+.show-status-tag.full { background: rgba(255, 71, 87, 0.18); color: var(--red); }
+
+/* Live Seat Stats Dashboard Box */
+.seat-stats-card {
+  background: var(--bg2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 18px 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+.stat-item .stat-num {
+  font-size: 22px;
+  font-weight: 800;
+}
+.stat-item .stat-lbl {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 @keyframes loadingBar { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
@@ -1044,3 +1192,4 @@ body {
   #view-ticket { position: absolute; left: 0; top: 0; width: 100%; padding: 0; }
   .navbar, .footer, .btn-back, .ticket-actions { display: none !important; }
 }
+

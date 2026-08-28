@@ -36,6 +36,21 @@
       <span class="logo-icon">🎬</span>
       <span class="logo-text">Smart<span class="gold">Cinema</span></span>
     </div>
+    
+    <!-- Location Selector in Navbar -->
+    <div class="nav-location" id="nav-location-wrap">
+      <span class="loc-icon">📍</span>
+      <select id="nav-city-select" class="city-select-dropdown" onchange="changeCity(this.value)">
+        <option value="Hyderabad">Hyderabad</option>
+        <option value="Vijayawada">Vijayawada</option>
+        <option value="Vizag">Visakhapatnam (Vizag)</option>
+        <option value="Bengaluru">Bengaluru</option>
+        <option value="Chennai">Chennai</option>
+        <option value="Mumbai">Mumbai</option>
+      </select>
+      <button class="btn-detect-loc" onclick="detectUserLocation()" title="Detect my location">🎯 Near Me</button>
+    </div>
+
     <nav class="nav-links" id="nav-links">
       <a class="nav-link" data-nav="home">🏠 Home</a>
       <a class="nav-link" data-nav="history">🎟 My Bookings</a>
@@ -62,10 +77,10 @@
       </div>
       <h1 class="auth-headline">Your Premium<br/><span class="gold">Cinema Experience</span></h1>
       <ul class="auth-perks">
-        <li>🎭 Browse 100+ movies</li>
-        <li>💺 Interactive seat selection</li>
-        <li>⚡ Instant booking confirmation</li>
-        <li>🎟 Digital ticket generation</li>
+        <li>🔥 Present Trending Movies & Blockbusters</li>
+        <li>📍 Location-Based Nearby Theatres</li>
+        <li>💺 Live Seat Availability & Interactive Map</li>
+        <li>🎟 Instant E-Ticket Confirmation</li>
       </ul>
     </div>
     <div class="auth-right">
@@ -143,9 +158,12 @@
   <section class="hero">
     <div class="hero-bg"></div>
     <div class="hero-content">
-      <p class="hero-tag">🎬 Now Showing</p>
-      <h1 class="hero-title">Lights. Camera.<br/><span class="gold">Action!</span></h1>
-      <p class="hero-sub">Book premium seats · Live seat availability · Instant e-ticket</p>
+      <div class="hero-badge-wrap">
+        <span class="hero-tag">🔥 Present Trending Movies</span>
+        <span class="hero-location-badge">📍 Near <strong id="hero-city-name" class="gold">Hyderabad</strong></span>
+      </div>
+      <h1 class="hero-title">Present Trending Movies<br/><span class="gold">In Theatres Near You</span></h1>
+      <p class="hero-sub">Explore live trending blockbusters, near-location theatre showtimes & live seat availability</p>
     </div>
     <div class="hero-orbs">
       <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
@@ -155,15 +173,18 @@
   <!-- Search & Filter -->
   <section class="filter-bar">
     <div class="container">
-      <input class="search-input" id="search-input" type="text" placeholder="🔍 Search movies, genres..." oninput="filterMovies()"/>
+      <input class="search-input" id="search-input" type="text" placeholder="🔍 Search trending movies, languages (Telugu, Hindi, English), cast or genres..." oninput="filterMovies()"/>
       <div class="filter-chips" id="filter-chips">
         <button class="chip active" onclick="setGenre('All', this)">All</button>
+        <button class="chip" onclick="setGenre('Trending', this)">🔥 Trending</button>
+        <button class="chip" onclick="setGenre('Telugu', this)">Telugu</button>
+        <button class="chip" onclick="setGenre('Hindi', this)">Hindi</button>
+        <button class="chip" onclick="setGenre('English', this)">English</button>
+        <button class="chip" onclick="setGenre('Tamil', this)">Tamil</button>
         <button class="chip" onclick="setGenre('Action', this)">Action</button>
-        <button class="chip" onclick="setGenre('Drama', this)">Drama</button>
         <button class="chip" onclick="setGenre('Sci-Fi', this)">Sci-Fi</button>
+        <button class="chip" onclick="setGenre('Drama', this)">Drama</button>
         <button class="chip" onclick="setGenre('Comedy', this)">Comedy</button>
-        <button class="chip" onclick="setGenre('Thriller', this)">Thriller</button>
-        <button class="chip" onclick="setGenre('Romance', this)">Romance</button>
         <button class="chip" onclick="setGenre('Horror', this)">Horror</button>
       </div>
     </div>

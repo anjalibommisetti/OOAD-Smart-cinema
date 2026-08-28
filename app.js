@@ -120,7 +120,7 @@ class Screen {
 }
 
 class Movie {
-  constructor(title, duration, genre, rating = 'U/A', emoji = '🎬', lang = 'Telugu, English', basePrice = 150, description = '', releaseDate = '2026-08-01', id = null) {
+  constructor(title, duration, genre, rating = 'U/A', emoji = '🎬', lang = 'Telugu, English', basePrice = 180, description = '', trendingTag = '🔥 Trending', releaseDate = '2026-08-01', id = null) {
     this.id = id || uid('MOV', 6);
     this.title = title;
     this.duration = parseInt(duration) || 120;
@@ -128,29 +128,33 @@ class Movie {
     this.rating = rating;
     this.emoji = emoji || '🎬';
     this.lang = lang;
-    this.basePrice = parseFloat(basePrice) || 150;
+    this.basePrice = parseFloat(basePrice) || 180;
     this.description = description || 'Experience the cinema magic in ultra-high resolution and Dolby Atmos audio.';
+    this.trendingTag = trendingTag;
     this.releaseDate = releaseDate;
   }
 }
 
 class Theatre {
-  constructor(name, location, screensCount = 3, id = null) {
+  constructor(name, location, city = 'Hyderabad', distance = '2.5 km', screensCount = 4, id = null) {
     this.id = id || uid('TH', 6);
     this.name = name;
     this.location = location;
-    this.screensCount = parseInt(screensCount) || 3;
+    this.city = city;
+    this.distance = distance;
+    this.screensCount = parseInt(screensCount) || 4;
   }
 }
 
 class Show {
-  constructor(movie, theatre, screen, dateTimeStr, basePrice = null, id = null) {
+  constructor(movie, theatre, screen, dateTimeStr, basePrice = null, statusText = '🟢 Available', id = null) {
     this.id = id || uid('SH', 6);
     this.movie = movie;
     this.theatre = theatre;
     this.screen = screen;
     this.dateTime = new Date(dateTimeStr);
     this.basePrice = basePrice || movie.basePrice;
+    this.statusText = statusText;
   }
 
   priceForSeat(seat) {
@@ -163,6 +167,10 @@ class Show {
 
   get formattedDate() {
     return this.dateTime.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  get formattedFull() {
+    return `${this.formattedDate} at ${this.formattedTime}`;
   }
 }
 
@@ -202,41 +210,70 @@ class CinemaSystem {
     this.selectedShow = null;
     this.selectedSeats = [];
     this.activeGenre = 'All';
+    this.currentCity = localStorage.getItem('sc_city') || 'Hyderabad';
 
     this.initData();
   }
 
   initData() {
-    // Load from LocalStorage if present
-    const savedMovies = localStorage.getItem('sc_movies');
-    const savedTheatres = localStorage.getItem('sc_theatres');
+    const savedMovies = localStorage.getItem('sc_movies_v4');
+    const savedTheatres = localStorage.getItem('sc_theatres_v4');
     const savedUsers = localStorage.getItem('sc_users');
     const savedBookings = localStorage.getItem('sc_bookings');
     const savedCurrentUser = localStorage.getItem('sc_current_user');
 
     if (savedMovies) {
       const raw = JSON.parse(savedMovies);
-      this.movies = raw.map(m => new Movie(m.title, m.duration, m.genre, m.rating, m.emoji, m.lang, m.basePrice, m.description, m.releaseDate, m.id));
+      this.movies = raw.map(m => new Movie(m.title, m.duration, m.genre, m.rating, m.emoji, m.lang, m.basePrice, m.description, m.trendingTag, m.releaseDate, m.id));
     } else {
       this.movies = [
-        new Movie('Inception 2: Mind Shift', 148, 'Sci-Fi', 'U/A', '🚀', 'English, Telugu', 200, 'A mind-bending thriller exploring deeper layers of the subconscious realm.'),
-        new Movie('The Last Village', 120, 'Drama', 'U', '🌿', 'Telugu', 150, 'An inspiring tale of resilience and community spirit in a remote valley.'),
-        new Movie('Neon Shadows', 105, 'Thriller', 'A', '🕵️', 'Hindi, English', 180, 'A cyber-noir detective story set in a glowing futuristic metropolis.'),
-        new Movie('Laugh Out Loud', 95, 'Comedy', 'U', '😂', 'Telugu, Hindi', 120, 'A hilarious journey of three friends embarking on an unexpected road trip.'),
-        new Movie('Spectral Hunt', 110, 'Horror', 'A', '👻', 'English', 160, 'Paranormal investigators uncover ancient secrets in an abandoned estate.'),
-        new Movie('Hearts in Venice', 130, 'Romance', 'U/A', '💖', 'English', 175, 'A picturesque romantic journey through the romantic canals of Italy.')
+        new Movie('Kalki 2898 AD', 180, 'Sci-Fi', 'U/A', '⚡', 'Telugu, Hindi, English', 250, 'A modern avatar descends to earth in a futuristic dystopian era to save humanity from dark forces. Starring Prabhas, Amitabh Bachchan & Kamal Haasan.', '🔥 Trending #1'),
+        new Movie('Pushpa 2: The Rule', 165, 'Action', 'U/A', '🪓', 'Telugu, Hindi, Tamil', 220, 'The clash continues as Pushpa Raj expands his red sandalwood empire and asserts his dominance against SP Bhanwar Singh Shekhawat. Starring Allu Arjun.', '🔥 Trending #2'),
+        new Movie('Devara: Part 1', 158, 'Action', 'U/A', '🌊', 'Telugu, Hindi, Tamil', 200, 'An epic coastal saga of bravery, fearlessness, and loyalty set across treacherous seas. Starring NTR Jr, Saif Ali Khan & Janhvi Kapoor.', '🔥 Trending #3'),
+        new Movie('Game Changer', 155, 'Drama', 'U/A', '🗳️', 'Telugu, Tamil, Hindi', 200, 'An honest IAS officer takes on corrupt political systems to revolutionize democratic elections. Directed by S. Shankar, starring Ram Charan.', '⚡ New Release'),
+        new Movie('Stree 2', 147, 'Horror', 'U/A', '👻', 'Hindi, Telugu', 180, 'The town of Chanderi faces a new terrifying headless entity, Sarkata. The group must unite with Stree to save the town. Starring Shraddha Kapoor.', '😂 Blockbuster'),
+        new Movie('G.O.A.T: Greatest of All Time', 170, 'Sci-Fi', 'U/A', '🎯', 'Tamil, Telugu, Hindi', 210, 'An elite anti-terrorist squad agent is haunted by past missions, leading to high-octane action and clone mysteries. Starring Thalapathy Vijay.', '🔥 Mass Hit'),
+        new Movie('Deadpool & Wolverine', 128, 'Comedy', 'A', '⚔️', 'English, Telugu, Hindi', 240, 'Wolverine is recovering from his injuries when he crosses paths with the loudmouth Deadpool to defeat a common enemy.', '🍿 Global Hit'),
+        new Movie('Singham Again', 160, 'Action', 'U/A', '🦁', 'Hindi, Telugu', 190, 'Bajirao Singham leads the cop universe in an explosive fight against dangerous syndicate cartels. Starring Ajay Devgn & Ranveer Singh.', '💥 Action Spectacle'),
+        new Movie('Vettaiyan', 162, 'Drama', 'U/A', '🕶️', 'Tamil, Telugu, Hindi', 200, 'A ruthless senior police officer fights against corruption and extrajudicial encounter setups. Starring Rajinikanth & Amitabh Bachchan.', '🔥 Superstar Hit')
       ];
       this.saveMovies();
     }
 
     if (savedTheatres) {
       const raw = JSON.parse(savedTheatres);
-      this.theatres = raw.map(t => new Theatre(t.name, t.location, t.screensCount, t.id));
+      this.theatres = raw.map(t => new Theatre(t.name, t.location, t.city, t.distance, t.screensCount, t.id));
     } else {
       this.theatres = [
-        new Theatre('PVR Cinemax - Gachibowli', 'Hyderabad, Telangana', 4),
-        new Theatre('Inox Megaplex - Banjara Hills', 'Hyderabad, Telangana', 5),
-        new Theatre('AMB Cinemas - Kondapur', 'Hyderabad, Telangana', 7)
+        // Hyderabad
+        new Theatre('AMB Cinemas - VIP Dolby Atmos', 'Kondapur, Hyderabad', 'Hyderabad', '2.1 km', 7),
+        new Theatre('PVR Next Galleria Mall', 'Panjagutta, Hyderabad', 'Hyderabad', '4.5 km', 6),
+        new Theatre('Prasads Multiplex & IMAX Screen', 'NTR Marg, Hyderabad', 'Hyderabad', '5.2 km', 5),
+        new Theatre('INOX Megaplex - GVK One', 'Banjara Hills, Hyderabad', 'Hyderabad', '3.8 km', 5),
+        new Theatre('Asian Jyoti Cinema', 'Kukatpally, Hyderabad', 'Hyderabad', '6.0 km', 4),
+
+        // Vijayawada
+        new Theatre('PVP Square Cinepolis', 'M.G. Road, Vijayawada', 'Vijayawada', '1.5 km', 6),
+        new Theatre('Trendset Mall INOX', 'Benz Circle, Vijayawada', 'Vijayawada', '2.8 km', 5),
+        new Theatre('Capital Cinemas', 'Vijayawada Central', 'Vijayawada', '3.2 km', 4),
+
+        // Vizag
+        new Theatre('INOX CMR Central', 'Maddilapalem, Visakhapatnam', 'Vizag', '2.0 km', 6),
+        new Theatre('Jagadamba Theatre Complex', 'VSP Central, Visakhapatnam', 'Vizag', '1.8 km', 3),
+        new Theatre('Mukta A2 Cinemas', 'Beach Road, Visakhapatnam', 'Vizag', '3.5 km', 4),
+
+        // Bengaluru
+        new Theatre('PVR Forum Mall', 'Koramangala, Bengaluru', 'Bengaluru', '3.0 km', 7),
+        new Theatre('INOX Mantri Square', 'Malleshwaram, Bengaluru', 'Bengaluru', '4.2 km', 6),
+        new Theatre('Cinepolis SJR Orion Mall', 'Rajajinagar, Bengaluru', 'Bengaluru', '5.5 km', 5),
+
+        // Chennai
+        new Theatre('SPI Luxe Cinemas', 'Phoenix Marketcity, Velachery', 'Chennai', '2.4 km', 8),
+        new Theatre('PVR VR Chennai', 'Anna Nagar, Chennai', 'Chennai', '4.1 km', 10),
+
+        // Mumbai
+        new Theatre('PVR ICON Oberoi Mall', 'Goregaon East, Mumbai', 'Mumbai', '3.2 km', 6),
+        new Theatre('INOX Laserplex R-City', 'Ghatkopar West, Mumbai', 'Mumbai', '4.0 km', 9)
       ];
       this.saveTheatres();
     }
@@ -252,7 +289,6 @@ class CinemaSystem {
       this.saveUsers();
     }
 
-    // Build shows dynamically based on movies & theatres
     this.buildShows();
 
     if (savedCurrentUser) {
@@ -263,26 +299,44 @@ class CinemaSystem {
   buildShows() {
     this.shows = [];
     const baseDate = new Date();
-    baseDate.setDate(baseDate.getDate() + 1);
 
     this.movies.forEach((movie, mIdx) => {
       this.theatres.forEach((theatre, tIdx) => {
-        const screen = new Screen(`Screen-${(mIdx + tIdx) % 3 + 1}`, `Audi ${(mIdx + tIdx) % 3 + 1}`);
-        const showTimes = ['11:00', '14:30', '18:15', '21:30'];
+        const screenNumber = (mIdx + tIdx) % theatre.screensCount + 1;
+        const formatName = screenNumber === 1 ? 'Audi 1 - 4K Atmos' : screenNumber === 2 ? 'Audi 2 - VIP Recliner' : `Audi ${screenNumber} - Digital 3D`;
+        const screen = new Screen(`Screen-${theatre.id}-${screenNumber}`, formatName);
+
+        const showTimes = ['10:45 AM', '02:15 PM', '06:00 PM', '09:30 PM'];
 
         showTimes.forEach((timeStr, sIdx) => {
-          const [hours, mins] = timeStr.split(':');
           const dt = new Date(baseDate);
-          dt.setHours(parseInt(hours), parseInt(mins), 0);
-          dt.setDate(baseDate.getDate() + sIdx);
-          this.shows.push(new Show(movie, theatre, screen, dt.toISOString(), movie.basePrice));
+          dt.setDate(baseDate.getDate() + (sIdx % 2));
+          const [time, period] = timeStr.split(' ');
+          let [hours, mins] = time.split(':');
+          hours = parseInt(hours);
+          if (period === 'PM' && hours !== 12) hours += 12;
+          if (period === 'AM' && hours === 12) hours = 0;
+          dt.setHours(hours, parseInt(mins), 0);
+
+          // Randomly pre-book some seats deterministically to simulate real live seat availability
+          const seed = (mIdx * 17 + tIdx * 13 + sIdx * 7) % 100;
+          const seatsArr = Object.values(screen.seats);
+          const numBooked = Math.floor(seatsArr.length * ((seed % 40 + 10) / 100));
+
+          for (let b = 0; b < numBooked; b++) {
+            const seatIdx = (seed + b * 3) % seatsArr.length;
+            seatsArr[seatIdx].status = SeatStatus.BOOKED;
+          }
+
+          const statusText = screen.availableCount() < 10 ? '🔴 Almost Full' : screen.availableCount() < 25 ? '🟡 Fast Filling' : '🟢 Available';
+          this.shows.push(new Show(movie, theatre, screen, dt.toISOString(), movie.basePrice, statusText));
         });
       });
     });
   }
 
-  saveMovies() { localStorage.setItem('sc_movies', JSON.stringify(this.movies)); }
-  saveTheatres() { localStorage.setItem('sc_theatres', JSON.stringify(this.theatres)); }
+  saveMovies() { localStorage.setItem('sc_movies_v4', JSON.stringify(this.movies)); }
+  saveTheatres() { localStorage.setItem('sc_theatres_v4', JSON.stringify(this.theatres)); }
   saveUsers() { localStorage.setItem('sc_users', JSON.stringify(this.users)); }
   saveBookings() { localStorage.setItem('sc_bookings', JSON.stringify(this.bookings)); }
   saveSession() { localStorage.setItem('sc_current_user', JSON.stringify(this.currentUser)); }
@@ -322,10 +376,52 @@ class CinemaSystem {
 // Instantiate global system
 const app = new CinemaSystem();
 
+// ── LOCATION SWITCHER LOGIC ──
+
+window.changeCity = function(cityName) {
+  app.currentCity = cityName;
+  localStorage.setItem('sc_city', cityName);
+
+  const navSelect = document.getElementById('nav-city-select');
+  if (navSelect) navSelect.value = cityName;
+
+  const heroCity = document.getElementById('hero-city-name');
+  if (heroCity) heroCity.textContent = cityName;
+
+  showToast(`Showing cinemas & timings near ${cityName} 📍`);
+  renderMoviesGrid();
+
+  // If in theatre view, update theatre list
+  const theatreView = document.getElementById('view-theatre');
+  if (theatreView && !theatreView.classList.contains('hidden')) {
+    if (app.selectedMovie) startBooking(app.selectedMovie.id);
+  }
+};
+
+window.detectUserLocation = function() {
+  if (!navigator.geolocation) {
+    showToast('Geolocation is not supported by your browser. Set city manually.', 'error');
+    return;
+  }
+
+  showToast('Detecting your location... 🛰️');
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const detectedCity = 'Hyderabad'; // Default nearest location
+      changeCity(detectedCity);
+      showToast(`Detected location near ${detectedCity}! 🎯`);
+    },
+    (err) => {
+      changeCity('Hyderabad');
+      showToast('Location permission denied or timed out. Defaulted to Hyderabad 📍');
+    },
+    { timeout: 5000 }
+  );
+};
+
 // ── GLOBAL INTERFACE HANDLERS & ROUTING ──
 
 window.navigate = function(viewId) {
-  // Hide all view sections
   const views = document.querySelectorAll('.view');
   views.forEach(v => {
     v.classList.add('hidden');
@@ -338,7 +434,6 @@ window.navigate = function(viewId) {
     targetView.classList.add('active');
   }
 
-  // Header & Footer visibility
   const navbar = document.getElementById('main-navbar');
   const footer = document.getElementById('main-footer');
   if (viewId === 'splash' || viewId === 'auth') {
@@ -349,13 +444,16 @@ window.navigate = function(viewId) {
     if (footer) footer.classList.remove('hidden');
   }
 
-  // Update Nav Links
   document.querySelectorAll('.nav-link').forEach(link => {
     if (link.dataset.nav === viewId) link.classList.add('active');
     else link.classList.remove('active');
   });
 
-  // Page specific renders
+  const navSelect = document.getElementById('nav-city-select');
+  if (navSelect) navSelect.value = app.currentCity;
+  const heroCity = document.getElementById('hero-city-name');
+  if (heroCity) heroCity.textContent = app.currentCity;
+
   if (viewId === 'home') renderMoviesGrid();
   if (viewId === 'history') renderHistoryView();
   if (viewId === 'profile') renderProfileView();
@@ -468,8 +566,19 @@ function renderMoviesGrid() {
   if (!grid) return;
 
   const filtered = app.movies.filter(m => {
-    const matchGenre = app.activeGenre === 'All' || m.genre.toLowerCase() === app.activeGenre.toLowerCase();
-    const matchSearch = m.title.toLowerCase().includes(query) || m.genre.toLowerCase().includes(query);
+    let matchGenre = true;
+    if (app.activeGenre === 'Trending') {
+      matchGenre = m.trendingTag && m.trendingTag.includes('Trending');
+    } else if (['Telugu', 'Hindi', 'English', 'Tamil'].includes(app.activeGenre)) {
+      matchGenre = m.lang.toLowerCase().includes(app.activeGenre.toLowerCase());
+    } else if (app.activeGenre !== 'All') {
+      matchGenre = m.genre.toLowerCase() === app.activeGenre.toLowerCase();
+    }
+
+    const matchSearch = m.title.toLowerCase().includes(query) ||
+                        m.genre.toLowerCase().includes(query) ||
+                        m.lang.toLowerCase().includes(query) ||
+                        m.description.toLowerCase().includes(query);
     return matchGenre && matchSearch;
   });
 
@@ -482,17 +591,25 @@ function renderMoviesGrid() {
   if (noRes) noRes.classList.add('hidden');
   grid.innerHTML = filtered.map(m => `
     <div class="movie-card" onclick="viewMovieDetail('${m.id}')">
-      <div class="movie-poster">${m.emoji}</div>
+      <div class="movie-poster">
+        <span class="trending-badge">${m.trendingTag || '🔥 Trending'}</span>
+        ${m.emoji}
+      </div>
       <div class="movie-info">
         <div>
-          <span class="movie-genre">${m.genre}</span>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span class="movie-genre">${m.genre}</span>
+            <span style="font-size:11px;color:var(--text-dim);font-weight:600;">🗣 ${m.lang.split(',')[0]}</span>
+          </div>
           <h3 class="movie-title">${m.title}</h3>
           <div class="movie-meta">
             <span>⏱ ${m.duration} min</span>
             <span class="movie-rating">⭐ ${m.rating}</span>
           </div>
         </div>
-        <button class="btn-book" onclick="event.stopPropagation(); startBooking('${m.id}')">Book Tickets · From ₹${m.basePrice}</button>
+        <button class="btn-book" onclick="event.stopPropagation(); startBooking('${m.id}')">
+          Book Tickets · Near ${app.currentCity} (From ₹${m.basePrice})
+        </button>
       </div>
     </div>
   `).join('');
@@ -506,14 +623,18 @@ window.viewMovieDetail = function(movieId) {
   const container = document.getElementById('movie-detail-content');
   if (!container) return;
 
-  const showsForMovie = app.shows.filter(s => s.movie.id === movie.id);
+  const showsForCity = app.shows.filter(s => s.movie.id === movie.id && s.theatre.city === app.currentCity);
 
   container.innerHTML = `
     <div class="movie-detail-grid">
-      <div class="detail-poster">${movie.emoji}</div>
+      <div class="detail-poster" style="position:relative;">
+        <span class="trending-badge">${movie.trendingTag}</span>
+        ${movie.emoji}
+      </div>
       <div class="detail-info">
         <h1>${movie.title}</h1>
         <div class="detail-tags">
+          <span class="tag">🔥 ${movie.trendingTag}</span>
           <span class="tag">🎭 ${movie.genre}</span>
           <span class="tag">⏱ ${movie.duration} min</span>
           <span class="tag">⭐ ${movie.rating}</span>
@@ -521,13 +642,18 @@ window.viewMovieDetail = function(movieId) {
         </div>
         <p class="detail-desc">${movie.description}</p>
 
-        <h3 style="margin-top:24px;margin-bottom:16px;">Available Showtimes</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:24px;margin-bottom:16px;">
+          <h3>Near ${app.currentCity} Showtimes & Seat Availability</h3>
+          <button class="btn-outline" style="padding:6px 14px;font-size:12px;" onclick="startBooking('${movie.id}')">See All Theatres →</button>
+        </div>
+
         <div class="shows-grid">
-          ${showsForMovie.slice(0, 6).map(s => `
+          ${showsForCity.slice(0, 6).map(s => `
             <div class="show-chip" onclick="selectShowtime('${s.id}')">
               <div class="show-time">${s.formattedTime}</div>
               <div class="show-sub">${s.theatre.name.split('-')[0]}</div>
-              <div class="show-sub" style="color:var(--gold);font-weight:600">₹${s.basePrice}</div>
+              <div class="show-status-tag ${s.statusText.includes('Almost') ? 'full' : s.statusText.includes('Fast') ? 'fast' : 'avail'}">${s.statusText}</div>
+              <div class="show-sub" style="color:var(--gold);font-weight:600;margin-top:4px;">₹${s.basePrice}</div>
             </div>
           `).join('')}
         </div>
@@ -544,35 +670,58 @@ window.startBooking = function(movieId) {
   app.selectedMovie = movie;
 
   const titleEl = document.getElementById('theatre-movie-name');
-  if (titleEl) titleEl.textContent = `${movie.emoji} ${movie.title} (${movie.genre} · ${movie.duration} min)`;
+  if (titleEl) {
+    titleEl.innerHTML = `
+      <strong style="color:var(--gold);">${movie.emoji} ${movie.title}</strong>
+      <span>(${movie.genre} · ${movie.duration} min · ${movie.lang})</span>
+      <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">📍 Showing Cinemas Near <strong>${app.currentCity}</strong></div>
+    `;
+  }
 
   const theatreListEl = document.getElementById('theatre-list');
   if (!theatreListEl) return;
 
-  const showsForMovie = app.shows.filter(s => s.movie.id === movie.id);
+  const showsForMovieAndCity = app.shows.filter(s => s.movie.id === movie.id && s.theatre.city === app.currentCity);
   const theatreMap = {};
 
-  showsForMovie.forEach(s => {
+  showsForMovieAndCity.forEach(s => {
     if (!theatreMap[s.theatre.id]) {
       theatreMap[s.theatre.id] = { theatre: s.theatre, shows: [] };
     }
     theatreMap[s.theatre.id].shows.push(s);
   });
 
+  if (Object.keys(theatreMap).length === 0) {
+    theatreListEl.innerHTML = `
+      <div style="text-align:center;padding:40px;color:var(--text-dim);">
+        <div style="font-size:36px;margin-bottom:8px;">📍</div>
+        <p>No theatres currently playing this show in <strong>${app.currentCity}</strong>.</p>
+        <button class="btn-outline mt" onclick="changeCity('Hyderabad')">Switch to Hyderabad</button>
+      </div>
+    `;
+    navigate('theatre');
+    return;
+  }
+
   theatreListEl.innerHTML = Object.values(theatreMap).map(item => `
     <div class="theatre-card">
       <div class="theatre-header">
         <div>
           <div class="theatre-name">${item.theatre.name}</div>
-          <div class="theatre-loc">📍 ${item.theatre.location}</div>
+          <div class="theatre-badge-flex">
+            <span class="theatre-distance-pill">📍 ${item.theatre.distance} away</span>
+            <span class="theatre-loc">${item.theatre.location}</span>
+          </div>
         </div>
+        <span class="theatre-screen-pill">🎬 ${item.theatre.screensCount} Screens</span>
       </div>
       <div class="shows-grid">
         ${item.shows.map(sh => `
           <div class="show-chip" onclick="selectShowtime('${sh.id}')">
             <div class="show-time">${sh.formattedTime}</div>
             <div class="show-sub">${sh.screen.name}</div>
-            <div class="show-sub" style="color:var(--gold);font-weight:600">₹${sh.basePrice}</div>
+            <div class="show-status-tag ${sh.statusText.includes('Almost') ? 'full' : sh.statusText.includes('Fast') ? 'fast' : 'avail'}">${sh.statusText}</div>
+            <div class="show-sub" style="color:var(--gold);font-weight:700;margin-top:4px;">₹${sh.basePrice}</div>
           </div>
         `).join('')}
       </div>
@@ -584,7 +733,7 @@ window.startBooking = function(movieId) {
 
 window.selectShowtime = function(showId) {
   if (!app.currentUser) {
-    showToast('Please login or register to book seats!', 'error');
+    showToast('Please login or register to view seat availability & book tickets!', 'error');
     navigate('auth');
     return;
   }
@@ -598,7 +747,7 @@ window.selectShowtime = function(showId) {
   navigate('seats');
 };
 
-// ── SEAT MATRIX VIEW ──
+// ── SEAT MATRIX VIEW WITH LIVE AVAILABILITY ──
 
 function renderSeatSelectionView() {
   const show = app.selectedShow;
@@ -606,8 +755,15 @@ function renderSeatSelectionView() {
   if (!container || !show) return;
 
   const screen = show.screen;
+  const allSeats = Object.values(screen.seats);
+  const availableCount = allSeats.filter(s => s.isAvailable() && !app.selectedSeats.includes(s.label)).length;
+  const bookedCount = allSeats.filter(s => s.status === SeatStatus.BOOKED).length;
+  const selectedCount = app.selectedSeats.length;
+  const totalSeats = allSeats.length;
+  const occupancyRate = Math.round((bookedCount / totalSeats) * 100);
+
   const rows = {};
-  Object.values(screen.seats).forEach(s => {
+  allSeats.forEach(s => {
     if (!rows[s.row]) rows[s.row] = [];
     rows[s.row].push(s);
   });
@@ -617,7 +773,7 @@ function renderSeatSelectionView() {
   let mapHTML = `
     <div class="seat-screen-wrap">
       <div class="screen-curved"></div>
-      <div class="screen-text">SCREEN THIS WAY</div>
+      <div class="screen-text">SCREEN THIS WAY · ALL EYES HERE</div>
     </div>
     <div class="seat-map">
   `;
@@ -629,7 +785,9 @@ function renderSeatSelectionView() {
       const typeClass = s.type === SeatType.PREMIUM ? 'premium' : s.type === SeatType.RECLINER ? 'recliner' : '';
       const isSel = app.selectedSeats.includes(s.label);
       const statusClass = isSel ? 'selected' : (s.status === SeatStatus.BOOKED ? 'booked' : 'available');
-      mapHTML += `<div class="seat ${typeClass} ${statusClass}" onclick="toggleSeat('${s.label}')">${s.number}</div>`;
+      const seatPrice = show.priceForSeat(s);
+      const tooltip = `Seat ${s.label} (${s.type}) - ₹${seatPrice}`;
+      mapHTML += `<div class="seat ${typeClass} ${statusClass}" title="${tooltip}" onclick="toggleSeat('${s.label}')">${s.number}</div>`;
     });
     mapHTML += '</div>';
   });
@@ -639,27 +797,50 @@ function renderSeatSelectionView() {
   container.innerHTML = `
     <div style="margin-bottom:24px;">
       <h2>${show.movie.emoji} ${show.movie.title}</h2>
-      <p style="color:var(--text-dim);">${show.theatre.name} · ${show.screen.name} · ${show.formattedDate} at ${show.formattedTime}</p>
+      <p style="color:var(--text-dim);font-size:15px;">
+        📍 <strong>${show.theatre.name}</strong> (${show.theatre.location}) · 🎬 ${show.screen.name}<br/>
+        ⏰ ${show.formattedDate} at <strong>${show.formattedTime}</strong>
+      </p>
+    </div>
+
+    <!-- Live Seat Stats Dashboard -->
+    <div class="seat-stats-card">
+      <div class="stat-item">
+        <div class="stat-num" style="color:var(--green);">${availableCount}</div>
+        <div class="stat-lbl">🟢 Available</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" style="color:var(--red);">${bookedCount}</div>
+        <div class="stat-lbl">🔴 Occupied</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" style="color:var(--gold);">${selectedCount}</div>
+        <div class="stat-lbl">🟡 Selected</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">${occupancyRate}%</div>
+        <div class="stat-lbl">📊 Occupancy</div>
+      </div>
     </div>
 
     ${mapHTML}
 
     <div class="seat-legend">
       <div class="legend-item"><div class="legend-dot ld-avail"></div>Regular (₹${show.basePrice})</div>
-      <div class="legend-item"><div class="legend-dot ld-premium"></div>Premium (₹${Math.round(show.basePrice * 1.5)})</div>
-      <div class="legend-item"><div class="legend-dot ld-recliner"></div>Recliner (₹${Math.round(show.basePrice * 2.0)})</div>
+      <div class="legend-item"><div class="legend-dot ld-premium"></div>Premium Executive (₹${Math.round(show.basePrice * 1.5)})</div>
+      <div class="legend-item"><div class="legend-dot ld-recliner"></div>VIP Recliner (₹${Math.round(show.basePrice * 2.0)})</div>
       <div class="legend-item"><div class="legend-dot ld-sel"></div>Selected</div>
-      <div class="legend-item"><div class="legend-dot ld-booked"></div>Booked</div>
+      <div class="legend-item"><div class="legend-dot ld-booked"></div>Booked / Unavailable</div>
     </div>
 
     <div class="seat-summary-box">
       <div>
-        <div style="font-size:12px;color:var(--text-dim)">SELECTED SEATS</div>
-        <div style="font-size:18px;font-weight:700" id="selected-seat-labels">None</div>
+        <div style="font-size:12px;color:var(--text-dim)">SELECTED SEATS (${app.selectedSeats.length})</div>
+        <div style="font-size:18px;font-weight:700" id="selected-seat-labels">${app.selectedSeats.join(', ') || 'None'}</div>
       </div>
       <div>
-        <div style="font-size:12px;color:var(--text-dim)">TOTAL AMOUNT</div>
-        <div style="font-size:24px;font-weight:800;color:var(--gold)" id="selected-seat-total">₹0</div>
+        <div style="font-size:12px;color:var(--text-dim)">SUBTOTAL AMOUNT</div>
+        <div style="font-size:24px;font-weight:800;color:var(--gold)" id="selected-seat-total">₹${app.selectedSeats.reduce((sum, l) => sum + show.priceForSeat(show.screen.getSeat(l)), 0)}</div>
       </div>
       <button class="btn-primary" onclick="proceedToPayment()">Proceed to Payment →</button>
     </div>
@@ -679,23 +860,12 @@ window.toggleSeat = function(label) {
     app.selectedSeats.push(label);
   }
 
-  // Update Summary UI
-  const labelsEl = document.getElementById('selected-seat-labels');
-  const totalEl = document.getElementById('selected-seat-total');
-
-  if (labelsEl && totalEl) {
-    labelsEl.textContent = app.selectedSeats.join(', ') || 'None';
-    const total = app.selectedSeats.reduce((sum, l) => sum + show.priceForSeat(show.screen.getSeat(l)), 0);
-    totalEl.textContent = `₹${total}`;
-  }
-
-  // Update seat element active class
   renderSeatSelectionView();
 };
 
 window.proceedToPayment = function() {
   if (app.selectedSeats.length === 0) {
-    showToast('Please select at least one seat!', 'error');
+    showToast('Please select at least one seat before proceeding!', 'error');
     return;
   }
 
@@ -720,7 +890,8 @@ function renderPaymentView() {
       <h3 style="margin-bottom:16px;">Order Summary</h3>
       <div class="pay-breakdown">
         <div class="pay-line"><span>Movie</span><strong>${show.movie.emoji} ${show.movie.title}</strong></div>
-        <div class="pay-line"><span>Theatre</span><span>${show.theatre.name}</span></div>
+        <div class="pay-line"><span>Location / City</span><span>📍 ${app.currentCity}</span></div>
+        <div class="pay-line"><span>Theatre</span><span>${show.theatre.name} (${show.theatre.distance})</span></div>
         <div class="pay-line"><span>Showtime</span><span>${show.formattedFull}</span></div>
         <div class="pay-line"><span>Seats (${app.selectedSeats.length})</span><span>${app.selectedSeats.join(', ')}</span></div>
         <div class="pay-line"><span>Subtotal</span><span>₹${subtotal}</span></div>
@@ -734,7 +905,7 @@ function renderPaymentView() {
           <input type="radio" name="pay-method" value="Card" checked/> 💳 Credit / Debit Card
         </label>
         <label class="pay-method-option">
-          <input type="radio" name="pay-method" value="UPI"/> 📱 UPI / GPay / PhonePe
+          <input type="radio" name="pay-method" value="UPI"/> 📱 UPI / GPay / PhonePe / Paytm
         </label>
         <label class="pay-method-option">
           <input type="radio" name="pay-method" value="NetBanking"/> 🏦 Net Banking
@@ -778,7 +949,7 @@ function renderTicketView(booking) {
     <div class="ticket-card">
       <div class="ticket-header-stub">
         <h2>SmartCinema</h2>
-        <p>E-TICKET CONFIRMATION</p>
+        <p>E-TICKET CONFIRMATION · ${app.currentCity.toUpperCase()}</p>
       </div>
       <div class="ticket-body-stub">
         <div class="ticket-info-grid">
@@ -795,8 +966,8 @@ function renderTicketView(booking) {
             <div class="ticket-field-value">${show.movie.emoji} ${show.movie.title}</div>
           </div>
           <div>
-            <div class="ticket-field-label">THEATRE</div>
-            <div class="ticket-field-value">${show.theatre.name}</div>
+            <div class="ticket-field-label">THEATRE & LOCATION</div>
+            <div class="ticket-field-value">${show.theatre.name} (${app.currentCity})</div>
           </div>
           <div>
             <div class="ticket-field-label">SHOW DATE & TIME</div>
@@ -856,7 +1027,7 @@ function renderHistoryView() {
       <div class="ticket-poster-icon">${b.show.movie.emoji}</div>
       <div class="ticket-details">
         <h3 class="ticket-title">${b.show.movie.title}</h3>
-        <div class="ticket-sub">📍 ${b.show.theatre.name} · ⏰ ${b.show.formattedFull}</div>
+        <div class="ticket-sub">📍 ${b.show.theatre.name} (${app.currentCity}) · ⏰ ${b.show.formattedFull}</div>
         <div class="ticket-badges">
           ${b.seats.map(s => `<span class="seat-badge">${s.label}</span>`).join('')}
           <span class="status-badge ${b.status.toLowerCase()}">${b.status}</span>
@@ -902,6 +1073,7 @@ function renderProfileView() {
         <div>
           <h2>${app.currentUser.name}</h2>
           <p style="color:var(--text-dim)">${app.currentUser.email} · ${app.currentUser.role}</p>
+          <div style="font-size:12px;color:var(--gold);margin-top:4px;">📍 Preferred Location: ${app.currentCity}</div>
         </div>
       </div>
       <div class="profile-stats-grid">
@@ -938,7 +1110,6 @@ window.switchAdminTab = function(tabName, btnElement) {
 function renderAdminView() {
   if (!app.currentUser || app.currentUser.role !== 'Admin') return;
 
-  // Overview Stats
   const statsContainer = document.getElementById('admin-stats');
   if (statsContainer) {
     const totalRev = app.bookings.filter(b => b.status === BookingStatus.CONFIRMED).reduce((sum, b) => sum + b.totalAmount, 0);
@@ -948,7 +1119,7 @@ function renderAdminView() {
         <div class="num">₹${totalRev}</div>
       </div>
       <div class="stat-card">
-        <div class="lbl">ACTIVE MOVIES</div>
+        <div class="lbl">TRENDING MOVIES</div>
         <div class="num">${app.movies.length}</div>
       </div>
       <div class="stat-card">
@@ -962,7 +1133,6 @@ function renderAdminView() {
     `;
   }
 
-  // Admin Movies List
   const moviesContent = document.getElementById('admin-movies-content');
   if (moviesContent) {
     moviesContent.innerHTML = `
@@ -973,15 +1143,15 @@ function renderAdminView() {
       <div class="admin-table-wrap">
         <table class="admin-table">
           <thead>
-            <tr><th>Emoji</th><th>Title</th><th>Genre</th><th>Duration</th><th>Base Price</th><th>Actions</th></tr>
+            <tr><th>Emoji</th><th>Title</th><th>Genre</th><th>Languages</th><th>Base Price</th><th>Actions</th></tr>
           </thead>
           <tbody>
             ${app.movies.map(m => `
               <tr>
                 <td>${m.emoji}</td>
-                <td><strong>${m.title}</strong></td>
+                <td><strong>${m.title}</strong><br/><span style="font-size:11px;color:var(--gold);">${m.trendingTag || ''}</span></td>
                 <td>${m.genre}</td>
-                <td>${m.duration} min</td>
+                <td>${m.lang}</td>
                 <td>₹${m.basePrice}</td>
                 <td>
                   <button class="btn-outline" style="padding:4px 10px;font-size:12px;" onclick="editMovie('${m.id}')">Edit</button>
@@ -995,7 +1165,6 @@ function renderAdminView() {
     `;
   }
 
-  // Admin Theatres List
   const theatresContent = document.getElementById('admin-theatres-content');
   if (theatresContent) {
     theatresContent.innerHTML = `
@@ -1006,13 +1175,14 @@ function renderAdminView() {
       <div class="admin-table-wrap">
         <table class="admin-table">
           <thead>
-            <tr><th>Theatre Name</th><th>Location</th><th>Screens</th></tr>
+            <tr><th>Theatre Name</th><th>City</th><th>Location</th><th>Screens</th></tr>
           </thead>
           <tbody>
             ${app.theatres.map(t => `
               <tr>
                 <td><strong>${t.name}</strong></td>
-                <td>${t.location}</td>
+                <td><span class="status-badge confirmed">${t.city}</span></td>
+                <td>${t.location} (${t.distance})</td>
                 <td>${t.screensCount} Screens</td>
               </tr>
             `).join('')}
@@ -1022,7 +1192,6 @@ function renderAdminView() {
     `;
   }
 
-  // Admin Bookings List
   const bookingsContent = document.getElementById('admin-bookings-content');
   if (bookingsContent) {
     bookingsContent.innerHTML = `
@@ -1048,7 +1217,6 @@ function renderAdminView() {
     `;
   }
 
-  // Admin Users List
   const usersContent = document.getElementById('admin-users-content');
   if (usersContent) {
     usersContent.innerHTML = `
@@ -1072,12 +1240,11 @@ function renderAdminView() {
     `;
   }
 
-  // Admin Reports
   const reportsContent = document.getElementById('admin-reports-content');
   if (reportsContent) {
     reportsContent.innerHTML = `
       <h3>System Performance Reports</h3>
-      <p style="color:var(--text-dim);margin-top:8px;">Real-time booking occupancy rate is currently at <strong>84% peak volume</strong>.</p>
+      <p style="color:var(--text-dim);margin-top:8px;">Real-time booking occupancy rate is currently at <strong>88% peak volume</strong> for trending movies near <strong>${app.currentCity}</strong>.</p>
     `;
   }
 }
@@ -1127,7 +1294,7 @@ window.saveMovie = function(event) {
       m.releaseDate = release; m.rating = rating; m.basePrice = price; m.emoji = emoji; m.description = desc;
     }
   } else {
-    app.movies.push(new Movie(title, duration, genre, rating, emoji, lang, price, desc, release));
+    app.movies.push(new Movie(title, duration, genre, rating, emoji, lang, price, desc, '🔥 Trending', release));
   }
 
   app.saveMovies();
@@ -1153,7 +1320,7 @@ window.saveTheatre = function(event) {
   const loc = document.getElementById('t-location').value.trim();
   const screens = document.getElementById('t-screens').value;
 
-  app.theatres.push(new Theatre(name, loc, screens));
+  app.theatres.push(new Theatre(name, loc, app.currentCity, '2.0 km', screens));
   app.saveTheatres();
   app.buildShows();
   closeModal('modal-theatre');
@@ -1166,7 +1333,6 @@ window.saveTheatre = function(event) {
 document.addEventListener('DOMContentLoaded', () => {
   updateUserNavbar();
 
-  // Attach navbar item click handlers
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
@@ -1175,7 +1341,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Hide splash screen after 1.2s and launch SPA
   setTimeout(() => {
     if (app.currentUser) {
       navigate('home');
