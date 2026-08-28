@@ -213,6 +213,26 @@ class CinemaSystem {
     this.currentCity = localStorage.getItem('sc_city') || 'Hyderabad';
 
     this.initData();
+    this.syncBackend();
+  }
+
+  async syncBackend() {
+    try {
+      const res = await fetch('http://localhost:3000/api/movies');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.movies && data.movies.length > 0) {
+          this.movies = data.movies.map(m => new Movie(
+            m.title, m.duration, m.genre, m.rating, m.emoji, m.lang, 
+            parseFloat(m.base_price || m.basePrice), m.description, m.trending_tag || m.trendingTag, m.releaseDate, m.id
+          ));
+          if (typeof renderMoviesGrid === 'function') renderMoviesGrid();
+          console.log('⚡ Synced live movies from MySQL backend database!');
+        }
+      }
+    } catch (e) {
+      console.log('ℹ️ Running in standalone mode using local storage');
+    }
   }
 
   initData() {
