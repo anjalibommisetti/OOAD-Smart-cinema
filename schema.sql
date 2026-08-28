@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS movies (
     base_price DECIMAL(10,2) NOT NULL,
     description TEXT,
     trending_tag VARCHAR(50),
+    image_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -38,7 +39,8 @@ CREATE TABLE IF NOT EXISTS theatres (
     location VARCHAR(150) NOT NULL,
     city VARCHAR(50) NOT NULL,
     distance VARCHAR(20),
-    screens_count INT DEFAULT 4
+    screens_count INT DEFAULT 4,
+    image_url TEXT
 );
 
 -- 4. BOOKINGS TABLE

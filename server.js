@@ -49,12 +49,12 @@ app.get('/api/movies', async (req, res) => {
 
 // 1b. Add new movie
 app.post('/api/movies', async (req, res) => {
-    const { title, duration, genre, rating, emoji, lang, basePrice, description, trendingTag } = req.body;
+    const { title, duration, genre, rating, emoji, lang, basePrice, description, trendingTag, imageUrl } = req.body;
     const id = `MOV-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     try {
         await pool.query(
-            'INSERT INTO movies (id, title, duration, genre, rating, emoji, lang, base_price, description, trending_tag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [id, title, parseInt(duration) || 120, genre, rating || 'U/A', emoji || '🎬', lang, parseFloat(basePrice) || 180, description, trendingTag || '🔥 Trending']
+            'INSERT INTO movies (id, title, duration, genre, rating, emoji, lang, base_price, description, trending_tag, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [id, title, parseInt(duration) || 120, genre, rating || 'U/A', emoji || '🎬', lang, parseFloat(basePrice) || 180, description, trendingTag || '🔥 Trending', imageUrl || '']
         );
         res.json({ success: true, id });
     } catch (err) {
@@ -74,12 +74,12 @@ app.get('/api/theatres', async (req, res) => {
 
 // 2b. Add new theatre
 app.post('/api/theatres', async (req, res) => {
-    const { name, location, city, distance, screensCount } = req.body;
+    const { name, location, city, distance, screensCount, imageUrl } = req.body;
     const id = `TH-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     try {
         await pool.query(
-            'INSERT INTO theatres (id, name, location, city, distance, screens_count) VALUES (?, ?, ?, ?, ?, ?)',
-            [id, name, location, city || 'Hyderabad', distance || '2.0 km', parseInt(screensCount) || 4]
+            'INSERT INTO theatres (id, name, location, city, distance, screens_count, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [id, name, location, city || 'Hyderabad', distance || '2.0 km', parseInt(screensCount) || 4, imageUrl || '']
         );
         res.json({ success: true, id });
     } catch (err) {

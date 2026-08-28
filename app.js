@@ -126,7 +126,7 @@ class Screen {
 }
 
 class Movie {
-  constructor(title, duration, genre, rating = 'U/A', emoji = '🎬', lang = 'Telugu, English', basePrice = 180, description = '', trendingTag = '🔥 Trending', releaseDate = '2026-08-01', id = null) {
+  constructor(title, duration, genre, rating = 'U/A', emoji = '🎬', lang = 'Telugu, English', basePrice = 180, description = '', trendingTag = '🔥 Trending', releaseDate = '2026-08-01', id = null, imageUrl = '') {
     this.id = id || uid('MOV', 6);
     this.title = title;
     this.duration = parseInt(duration) || 120;
@@ -138,17 +138,19 @@ class Movie {
     this.description = description || 'Experience the cinema magic in ultra-high resolution and Dolby Atmos audio.';
     this.trendingTag = trendingTag;
     this.releaseDate = releaseDate;
+    this.imageUrl = imageUrl || '';
   }
 }
 
 class Theatre {
-  constructor(name, location, city = 'Hyderabad', distance = '2.5 km', screensCount = 4, id = null) {
+  constructor(name, location, city = 'Hyderabad', distance = '2.5 km', screensCount = 4, id = null, imageUrl = '') {
     this.id = id || uid('TH', 6);
     this.name = name;
     this.location = location;
     this.city = city;
     this.distance = distance;
     this.screensCount = parseInt(screensCount) || 4;
+    this.imageUrl = imageUrl || '';
   }
 }
 
@@ -230,7 +232,7 @@ class CinemaSystem {
         if (data.success && data.movies && data.movies.length > 0) {
           this.movies = data.movies.map(m => new Movie(
             m.title, m.duration, m.genre, m.rating, m.emoji, m.lang, 
-            parseFloat(m.base_price || m.basePrice), m.description, m.trending_tag || m.trendingTag, m.releaseDate, m.id
+            parseFloat(m.base_price || m.basePrice), m.description, m.trending_tag || m.trendingTag, m.releaseDate, m.id, m.image_url || m.imageUrl || ''
           ));
           if (typeof renderMoviesGrid === 'function') renderMoviesGrid();
           console.log('⚡ Synced live movies from MySQL backend database!');
@@ -250,25 +252,25 @@ class CinemaSystem {
 
     if (savedMovies) {
       const raw = JSON.parse(savedMovies);
-      this.movies = raw.map(m => new Movie(m.title, m.duration, m.genre, m.rating, m.emoji, m.lang, m.basePrice, m.description, m.trendingTag, m.releaseDate, m.id));
+      this.movies = raw.map(m => new Movie(m.title, m.duration, m.genre, m.rating, m.emoji, m.lang, m.basePrice, m.description, m.trendingTag, m.releaseDate, m.id, m.imageUrl || ''));
     } else {
       this.movies = [
-        new Movie('Kalki 2898 AD', 180, 'Sci-Fi', 'U/A', '⚡', 'Telugu, Hindi, English', 250, 'A modern avatar descends to earth in a futuristic dystopian era to save humanity from dark forces. Starring Prabhas, Amitabh Bachchan & Kamal Haasan.', '🔥 Trending #1'),
-        new Movie('Pushpa 2: The Rule', 165, 'Action', 'U/A', '🪓', 'Telugu, Hindi, Tamil', 220, 'The clash continues as Pushpa Raj expands his red sandalwood empire and asserts his dominance against SP Bhanwar Singh Shekhawat. Starring Allu Arjun.', '🔥 Trending #2'),
-        new Movie('Devara: Part 1', 158, 'Action', 'U/A', '🌊', 'Telugu, Hindi, Tamil', 200, 'An epic coastal saga of bravery, fearlessness, and loyalty set across treacherous seas. Starring NTR Jr, Saif Ali Khan & Janhvi Kapoor.', '🔥 Trending #3'),
-        new Movie('Game Changer', 155, 'Drama', 'U/A', '🗳️', 'Telugu, Tamil, Hindi', 200, 'An honest IAS officer takes on corrupt political systems to revolutionize democratic elections. Directed by S. Shankar, starring Ram Charan.', '⚡ New Release'),
-        new Movie('Stree 2', 147, 'Horror', 'U/A', '👻', 'Hindi, Telugu', 180, 'The town of Chanderi faces a new terrifying headless entity, Sarkata. The group must unite with Stree to save the town. Starring Shraddha Kapoor.', '😂 Blockbuster'),
-        new Movie('G.O.A.T: Greatest of All Time', 170, 'Sci-Fi', 'U/A', '🎯', 'Tamil, Telugu, Hindi', 210, 'An elite anti-terrorist squad agent is haunted by past missions, leading to high-octane action and clone mysteries. Starring Thalapathy Vijay.', '🔥 Mass Hit'),
-        new Movie('Deadpool & Wolverine', 128, 'Comedy', 'A', '⚔️', 'English, Telugu, Hindi', 240, 'Wolverine is recovering from his injuries when he crosses paths with the loudmouth Deadpool to defeat a common enemy.', '🍿 Global Hit'),
-        new Movie('Singham Again', 160, 'Action', 'U/A', '🦁', 'Hindi, Telugu', 190, 'Bajirao Singham leads the cop universe in an explosive fight against dangerous syndicate cartels. Starring Ajay Devgn & Ranveer Singh.', '💥 Action Spectacle'),
-        new Movie('Vettaiyan', 162, 'Drama', 'U/A', '🕶️', 'Tamil, Telugu, Hindi', 200, 'A ruthless senior police officer fights against corruption and extrajudicial encounter setups. Starring Rajinikanth & Amitabh Bachchan.', '🔥 Superstar Hit')
+        new Movie('Kalki 2898 AD', 180, 'Sci-Fi', 'U/A', '⚡', 'Telugu, Hindi, English', 250, 'A modern avatar descends to earth in a futuristic dystopian era to save humanity from dark forces. Starring Prabhas, Amitabh Bachchan & Kamal Haasan.', '🔥 Trending #1', '2026-08-01', null, 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&auto=format&fit=crop&q=80'),
+        new Movie('Pushpa 2: The Rule', 165, 'Action', 'U/A', '🪓', 'Telugu, Hindi, Tamil', 220, 'The clash continues as Pushpa Raj expands his red sandalwood empire and asserts his dominance against SP Bhanwar Singh Shekhawat. Starring Allu Arjun.', '🔥 Trending #2', '2026-08-01', null, 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=600&auto=format&fit=crop&q=80'),
+        new Movie('Devara: Part 1', 158, 'Action', 'U/A', '🌊', 'Telugu, Hindi, Tamil', 200, 'An epic coastal saga of bravery, fearlessness, and loyalty set across treacherous seas. Starring NTR Jr, Saif Ali Khan & Janhvi Kapoor.', '🔥 Trending #3', '2026-08-01', null, 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&auto=format&fit=crop&q=80'),
+        new Movie('Game Changer', 155, 'Drama', 'U/A', '🗳️', 'Telugu, Tamil, Hindi', 200, 'An honest IAS officer takes on corrupt political systems to revolutionize democratic elections. Directed by S. Shankar, starring Ram Charan.', '⚡ New Release', '2026-08-01', null, 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=600&auto=format&fit=crop&q=80'),
+        new Movie('Stree 2', 147, 'Horror', 'U/A', '👻', 'Hindi, Telugu', 180, 'The town of Chanderi faces a new terrifying headless entity, Sarkata. The group must unite with Stree to save the town. Starring Shraddha Kapoor.', '😂 Blockbuster', '2026-08-01', null, 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop&q=80'),
+        new Movie('G.O.A.T: Greatest of All Time', 170, 'Sci-Fi', 'U/A', '🎯', 'Tamil, Telugu, Hindi', 210, 'An elite anti-terrorist squad agent is haunted by past missions, leading to high-octane action and clone mysteries. Starring Thalapathy Vijay.', '🔥 Mass Hit', '2026-08-01', null, 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80'),
+        new Movie('Deadpool & Wolverine', 128, 'Comedy', 'A', '⚔️', 'English, Telugu, Hindi', 240, 'Wolverine is recovering from his injuries when he crosses paths with the loudmouth Deadpool to defeat a common enemy.', '🍿 Global Hit', '2026-08-01', null, 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80'),
+        new Movie('Singham Again', 160, 'Action', 'U/A', '🦁', 'Hindi, Telugu', 190, 'Bajirao Singham leads the cop universe in an explosive fight against dangerous syndicate cartels. Starring Ajay Devgn & Ranveer Singh.', '💥 Action Spectacle', '2026-08-01', null, 'https://images.unsplash.com/photo-1533928298208-27ff66a55d8d?w=600&auto=format&fit=crop&q=80'),
+        new Movie('Vettaiyan', 162, 'Drama', 'U/A', '🕶️', 'Tamil, Telugu, Hindi', 200, 'A ruthless senior police officer fights against corruption and extrajudicial encounter setups. Starring Rajinikanth & Amitabh Bachchan.', '🔥 Superstar Hit', '2026-08-01', null, 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=600&auto=format&fit=crop&q=80')
       ];
       this.saveMovies();
     }
 
     if (savedTheatres) {
       const raw = JSON.parse(savedTheatres);
-      this.theatres = raw.map(t => new Theatre(t.name, t.location, t.city, t.distance, t.screensCount, t.id));
+      this.theatres = raw.map(t => new Theatre(t.name, t.location, t.city, t.distance, t.screensCount, t.id, t.imageUrl || ''));
     } else {
       this.theatres = [
         // Hyderabad
@@ -617,9 +619,10 @@ function renderMoviesGrid() {
   if (noRes) noRes.classList.add('hidden');
   grid.innerHTML = filtered.map(m => `
     <div class="movie-card" onclick="viewMovieDetail('${m.id}')">
-      <div class="movie-poster">
+      <div class="movie-poster" style="position:relative;overflow:hidden;background:#181826;">
         <span class="trending-badge">${m.trendingTag || '🔥 Trending'}</span>
-        ${m.emoji}
+        ${m.imageUrl ? `<img src="${m.imageUrl}" alt="${m.title}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none';"/>` : ''}
+        <span style="font-size:72px;">${m.emoji}</span>
       </div>
       <div class="movie-info">
         <div>
@@ -653,9 +656,10 @@ window.viewMovieDetail = function(movieId) {
 
   container.innerHTML = `
     <div class="movie-detail-grid">
-      <div class="detail-poster" style="position:relative;">
+      <div class="detail-poster" style="position:relative;overflow:hidden;background:#181826;">
         <span class="trending-badge">${movie.trendingTag}</span>
-        ${movie.emoji}
+        ${movie.imageUrl ? `<img src="${movie.imageUrl}" alt="${movie.title}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none';"/>` : ''}
+        <span style="font-size:96px;">${movie.emoji}</span>
       </div>
       <div class="detail-info">
         <h1>${movie.title}</h1>
@@ -730,15 +734,17 @@ window.startBooking = function(movieId) {
   }
 
   theatreListEl.innerHTML = Object.values(theatreMap).map(item => `
-    <div class="theatre-card">
-      <div class="theatre-header">
-        <div>
-          <div class="theatre-name">${item.theatre.name}</div>
-          <div class="theatre-badge-flex">
-            <span class="theatre-distance-pill">📍 ${item.theatre.distance} away</span>
-            <span class="theatre-loc">${item.theatre.location}</span>
+    <div class="theatre-card" style="display:flex;gap:20px;align-items:flex-start;">
+      ${item.theatre.imageUrl ? `<img src="${item.theatre.imageUrl}" alt="${item.theatre.name}" style="width:110px;height:85px;object-fit:cover;border-radius:12px;border:1px solid var(--glass-border);flex-shrink:0;" onerror="this.style.display='none';" />` : ''}
+      <div style="flex:1;">
+        <div class="theatre-header">
+          <div>
+            <div class="theatre-name">${item.theatre.name}</div>
+            <div class="theatre-badge-flex">
+              <span class="theatre-distance-pill">📍 ${item.theatre.distance} away</span>
+              <span class="theatre-loc">${item.theatre.location}</span>
+            </div>
           </div>
-        </div>
         <span class="theatre-screen-pill">🎬 ${item.theatre.screensCount} Screens</span>
       </div>
       <div class="shows-grid">
@@ -749,9 +755,9 @@ window.startBooking = function(movieId) {
             <div class="show-status-tag ${sh.statusText.includes('Almost') ? 'full' : sh.statusText.includes('Fast') ? 'fast' : 'avail'}">${sh.statusText}</div>
             <div class="show-sub" style="color:var(--gold);font-weight:700;margin-top:4px;">₹${sh.basePrice}</div>
           </div>
-        `).join('')}
       </div>
     </div>
+  </div>
   `).join('');
 
   navigate('theatre');
@@ -1295,6 +1301,7 @@ window.editMovie = function(movieId) {
   document.getElementById('m-rating').value = m.rating;
   document.getElementById('m-price').value = m.basePrice;
   document.getElementById('m-emoji').value = m.emoji;
+  if (document.getElementById('m-image')) document.getElementById('m-image').value = m.imageUrl || '';
   document.getElementById('m-desc').value = m.description;
   document.getElementById('movie-modal-title').textContent = 'Edit Movie';
   openModal('modal-movie');
@@ -1311,15 +1318,16 @@ window.saveMovie = async function(event) {
   const rating = document.getElementById('m-rating').value;
   const price = document.getElementById('m-price').value;
   const emoji = document.getElementById('m-emoji').value.trim() || '🎬';
+  const imageUrl = document.getElementById('m-image')?.value.trim() || '';
   const desc = document.getElementById('m-desc').value.trim();
 
-  const newMovie = new Movie(title, duration, genre, rating, emoji, lang, price, desc, '🔥 Trending', release);
+  const newMovie = new Movie(title, duration, genre, rating, emoji, lang, price, desc, '🔥 Trending', release, id || null, imageUrl);
 
   if (id) {
     const m = app.movies.find(mov => mov.id === id);
     if (m) {
       m.title = title; m.genre = genre; m.lang = lang; m.duration = duration;
-      m.releaseDate = release; m.rating = rating; m.basePrice = price; m.emoji = emoji; m.description = desc;
+      m.releaseDate = release; m.rating = rating; m.basePrice = price; m.emoji = emoji; m.imageUrl = imageUrl; m.description = desc;
     }
   } else {
     app.movies.unshift(newMovie);
@@ -1328,7 +1336,7 @@ window.saveMovie = async function(event) {
       await fetch('http://localhost:3000/api/movies', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, duration, genre, rating, emoji, lang, basePrice: price, description: desc, trendingTag: '🔥 Trending' })
+        body: JSON.stringify({ title, duration, genre, rating, emoji, lang, basePrice: price, description: desc, trendingTag: '🔥 Trending', imageUrl })
       });
     } catch (e) {
       console.log('Saved movie locally');
@@ -1340,7 +1348,7 @@ window.saveMovie = async function(event) {
   closeModal('modal-movie');
   renderAdminView();
   renderMoviesGrid();
-  showToast(`Movie "${title}" added successfully! 🎬`);
+  showToast(`Movie "${title}" saved successfully! 🎬`);
 };
 
 window.deleteMovie = function(movieId) {
@@ -1356,9 +1364,10 @@ window.saveTheatre = async function(event) {
   event.preventDefault();
   const name = document.getElementById('t-name').value.trim();
   const loc = document.getElementById('t-location').value.trim();
+  const imageUrl = document.getElementById('t-image')?.value.trim() || '';
   const screens = document.getElementById('t-screens').value;
 
-  const newTheatre = new Theatre(name, loc, app.currentCity, '2.0 km', screens);
+  const newTheatre = new Theatre(name, loc, app.currentCity, '2.0 km', screens, null, imageUrl);
   app.theatres.unshift(newTheatre);
 
   try {
