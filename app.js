@@ -1294,7 +1294,7 @@ window.editMovie = function(movieId) {
   openModal('modal-movie');
 };
 
-window.saveMovie = function(event) {
+window.saveMovie = async function(event) {
   event.preventDefault();
   const id = document.getElementById('m-edit-id').value;
   const title = document.getElementById('m-title').value.trim();
@@ -1307,6 +1307,8 @@ window.saveMovie = function(event) {
   const emoji = document.getElementById('m-emoji').value.trim() || '🎬';
   const desc = document.getElementById('m-desc').value.trim();
 
+  const newMovie = new Movie(title, duration, genre, rating, emoji, lang, price, desc, '🔥 Trending', release);
+
   if (id) {
     const m = app.movies.find(mov => mov.id === id);
     if (m) {
@@ -1314,7 +1316,17 @@ window.saveMovie = function(event) {
       m.releaseDate = release; m.rating = rating; m.basePrice = price; m.emoji = emoji; m.description = desc;
     }
   } else {
-    app.movies.push(new Movie(title, duration, genre, rating, emoji, lang, price, desc, '🔥 Trending', release));
+    app.movies.unshift(newMovie);
+    // Send to MySQL backend API
+    try {
+      await fetch('http://localhost:3000/api/movies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, duration, genre, rating, emoji, lang, basePrice: price, description: desc, trendingTag: '🔥 Trending' })
+      });
+    } catch (e) {
+      console.log('Saved movie locally');
+    }
   }
 
   app.saveMovies();
@@ -1322,7 +1334,7 @@ window.saveMovie = function(event) {
   closeModal('modal-movie');
   renderAdminView();
   renderMoviesGrid();
-  showToast('Movie catalog updated!');
+  showToast(`Movie "${title}" added successfully! 🎬`);
 };
 
 window.deleteMovie = function(movieId) {
@@ -1334,18 +1346,30 @@ window.deleteMovie = function(movieId) {
   showToast('Movie deleted');
 };
 
-window.saveTheatre = function(event) {
+window.saveTheatre = async function(event) {
   event.preventDefault();
   const name = document.getElementById('t-name').value.trim();
   const loc = document.getElementById('t-location').value.trim();
   const screens = document.getElementById('t-screens').value;
 
-  app.theatres.push(new Theatre(name, loc, app.currentCity, '2.0 km', screens));
+  const newTheatre = new Theatre(name, loc, app.currentCity, '2.0 km', screens);
+  app.theatres.unshift(newTheatre);
+
+  try {
+    await fetch('http://localhost:3000/api/theatres', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, location: loc, city: app.currentCity, distance: '2.0 km', screensCount: screens })
+    });
+  } catch (e) {
+    console.log('Saved theatre locally');
+  }
+
   app.saveTheatres();
   app.buildShows();
   closeModal('modal-theatre');
   renderAdminView();
-  showToast('Theatre added successfully');
+  showToast(`Theatre "${name}" added successfully! 🏟️`);
 };
 
 // ── INITIALIZATION ──

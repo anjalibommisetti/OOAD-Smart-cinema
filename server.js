@@ -40,8 +40,23 @@ initDB();
 // 1. Get all movies
 app.get('/api/movies', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM movies');
+        const [rows] = await pool.query('SELECT * FROM movies ORDER BY created_at DESC');
         res.json({ success: true, movies: rows });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 1b. Add new movie
+app.post('/api/movies', async (req, res) => {
+    const { title, duration, genre, rating, emoji, lang, basePrice, description, trendingTag } = req.body;
+    const id = `MOV-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    try {
+        await pool.query(
+            'INSERT INTO movies (id, title, duration, genre, rating, emoji, lang, base_price, description, trending_tag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [id, title, parseInt(duration) || 120, genre, rating || 'U/A', emoji || '🎬', lang, parseFloat(basePrice) || 180, description, trendingTag || '🔥 Trending']
+        );
+        res.json({ success: true, id });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
@@ -52,6 +67,21 @@ app.get('/api/theatres', async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM theatres');
         res.json({ success: true, theatres: rows });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 2b. Add new theatre
+app.post('/api/theatres', async (req, res) => {
+    const { name, location, city, distance, screensCount } = req.body;
+    const id = `TH-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    try {
+        await pool.query(
+            'INSERT INTO theatres (id, name, location, city, distance, screens_count) VALUES (?, ?, ?, ?, ?, ?)',
+            [id, name, location, city || 'Hyderabad', distance || '2.0 km', parseInt(screensCount) || 4]
+        );
+        res.json({ success: true, id });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
