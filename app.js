@@ -745,19 +745,20 @@ window.startBooking = function(movieId) {
               <span class="theatre-loc">${item.theatre.location}</span>
             </div>
           </div>
-        <span class="theatre-screen-pill">🎬 ${item.theatre.screensCount} Screens</span>
-      </div>
-      <div class="shows-grid">
-        ${item.shows.map(sh => `
-          <div class="show-chip" onclick="selectShowtime('${sh.id}')">
-            <div class="show-time">${sh.formattedTime}</div>
-            <div class="show-sub">${sh.screen.name}</div>
-            <div class="show-status-tag ${sh.statusText.includes('Almost') ? 'full' : sh.statusText.includes('Fast') ? 'fast' : 'avail'}">${sh.statusText}</div>
-            <div class="show-sub" style="color:var(--gold);font-weight:700;margin-top:4px;">₹${sh.basePrice}</div>
-          </div>
+          <span class="theatre-screen-pill">🎬 ${item.theatre.screensCount} Screens</span>
+        </div>
+        <div class="shows-grid">
+          ${item.shows.map(sh => `
+            <div class="show-chip" onclick="selectShowtime('${sh.id}')">
+              <div class="show-time">${sh.formattedTime}</div>
+              <div class="show-sub">${sh.screen.name}</div>
+              <div class="show-status-tag ${sh.statusText.includes('Almost') ? 'full' : sh.statusText.includes('Fast') ? 'fast' : 'avail'}">${sh.statusText}</div>
+              <div class="show-sub" style="color:var(--gold);font-weight:700;margin-top:4px;">₹${sh.basePrice}</div>
+            </div>
+          `).join('')}
+        </div>
       </div>
     </div>
-  </div>
   `).join('');
 
   navigate('theatre');
