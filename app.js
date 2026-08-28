@@ -225,15 +225,33 @@ class CinemaSystem {
   }
 
   async syncBackend() {
+    const defaultPosters = {
+      'Kalki 2898 AD': 'https://upload.wikimedia.org/wikipedia/en/4/4c/Kalki_2898_AD.jpg',
+      'Pushpa 2: The Rule': 'https://upload.wikimedia.org/wikipedia/en/1/11/Pushpa_2-_The_Rule.jpg',
+      'Devara: Part 1': 'https://upload.wikimedia.org/wikipedia/en/4/44/Devara_Poster.jpeg',
+      'Game Changer': 'https://upload.wikimedia.org/wikipedia/en/6/6a/Game_Changer_Telugu.jpg',
+      'Stree 2': 'https://upload.wikimedia.org/wikipedia/en/8/85/Stree_2_poster.jpeg',
+      'G.O.A.T: Greatest of All Time': 'https://upload.wikimedia.org/wikipedia/en/1/1e/The_Greatest_of_All_Time.jpg',
+      'Deadpool & Wolverine': 'https://upload.wikimedia.org/wikipedia/en/4/4c/Deadpool_%26_Wolverine_poster.jpg',
+      'Singham Again': 'https://upload.wikimedia.org/wikipedia/en/0/04/Singham_Again_poster.jpg',
+      'Vettaiyan': 'https://upload.wikimedia.org/wikipedia/en/6/68/Vettaiyan_poster.jpg'
+    };
+
     try {
       const res = await fetch('http://localhost:3000/api/movies');
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.movies && data.movies.length > 0) {
-          this.movies = data.movies.map(m => new Movie(
-            m.title, m.duration, m.genre, m.rating, m.emoji, m.lang, 
-            parseFloat(m.base_price || m.basePrice), m.description, m.trending_tag || m.trendingTag, m.releaseDate, m.id, m.image_url || m.imageUrl || ''
-          ));
+          this.movies = data.movies.map(m => {
+            let img = m.image_url || m.imageUrl || '';
+            if (!img || img.includes('unsplash.com')) {
+              img = defaultPosters[m.title] || img;
+            }
+            return new Movie(
+              m.title, m.duration, m.genre, m.rating, m.emoji, m.lang, 
+              parseFloat(m.base_price || m.basePrice), m.description, m.trending_tag || m.trendingTag, m.releaseDate, m.id, img
+            );
+          });
           if (typeof renderMoviesGrid === 'function') renderMoviesGrid();
           console.log('⚡ Synced live movies from MySQL backend database!');
         }
@@ -244,26 +262,44 @@ class CinemaSystem {
   }
 
   initData() {
-    const savedMovies = localStorage.getItem('sc_movies_v4');
-    const savedTheatres = localStorage.getItem('sc_theatres_v4');
+    const defaultPosters = {
+      'Kalki 2898 AD': 'https://upload.wikimedia.org/wikipedia/en/4/4c/Kalki_2898_AD.jpg',
+      'Pushpa 2: The Rule': 'https://upload.wikimedia.org/wikipedia/en/1/11/Pushpa_2-_The_Rule.jpg',
+      'Devara: Part 1': 'https://upload.wikimedia.org/wikipedia/en/4/44/Devara_Poster.jpeg',
+      'Game Changer': 'https://upload.wikimedia.org/wikipedia/en/6/6a/Game_Changer_Telugu.jpg',
+      'Stree 2': 'https://upload.wikimedia.org/wikipedia/en/8/85/Stree_2_poster.jpeg',
+      'G.O.A.T: Greatest of All Time': 'https://upload.wikimedia.org/wikipedia/en/1/1e/The_Greatest_of_All_Time.jpg',
+      'Deadpool & Wolverine': 'https://upload.wikimedia.org/wikipedia/en/4/4c/Deadpool_%26_Wolverine_poster.jpg',
+      'Singham Again': 'https://upload.wikimedia.org/wikipedia/en/0/04/Singham_Again_poster.jpg',
+      'Vettaiyan': 'https://upload.wikimedia.org/wikipedia/en/6/68/Vettaiyan_poster.jpg'
+    };
+
+    const savedMovies = localStorage.getItem('sc_movies_v5');
+    const savedTheatres = localStorage.getItem('sc_theatres_v5');
     const savedUsers = localStorage.getItem('sc_users');
     const savedBookings = localStorage.getItem('sc_bookings');
     const savedCurrentUser = localStorage.getItem('sc_current_user');
 
     if (savedMovies) {
       const raw = JSON.parse(savedMovies);
-      this.movies = raw.map(m => new Movie(m.title, m.duration, m.genre, m.rating, m.emoji, m.lang, m.basePrice, m.description, m.trendingTag, m.releaseDate, m.id, m.imageUrl || ''));
+      this.movies = raw.map(m => {
+        let img = m.imageUrl || '';
+        if (!img || img.includes('unsplash.com')) {
+          img = defaultPosters[m.title] || img;
+        }
+        return new Movie(m.title, m.duration, m.genre, m.rating, m.emoji, m.lang, m.basePrice, m.description, m.trendingTag, m.releaseDate, m.id, img);
+      });
     } else {
       this.movies = [
-        new Movie('Kalki 2898 AD', 180, 'Sci-Fi', 'U/A', '⚡', 'Telugu, Hindi, English', 250, 'A modern avatar descends to earth in a futuristic dystopian era to save humanity from dark forces. Starring Prabhas, Amitabh Bachchan & Kamal Haasan.', '🔥 Trending #1', '2026-08-01', null, 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&auto=format&fit=crop&q=80'),
-        new Movie('Pushpa 2: The Rule', 165, 'Action', 'U/A', '🪓', 'Telugu, Hindi, Tamil', 220, 'The clash continues as Pushpa Raj expands his red sandalwood empire and asserts his dominance against SP Bhanwar Singh Shekhawat. Starring Allu Arjun.', '🔥 Trending #2', '2026-08-01', null, 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=600&auto=format&fit=crop&q=80'),
-        new Movie('Devara: Part 1', 158, 'Action', 'U/A', '🌊', 'Telugu, Hindi, Tamil', 200, 'An epic coastal saga of bravery, fearlessness, and loyalty set across treacherous seas. Starring NTR Jr, Saif Ali Khan & Janhvi Kapoor.', '🔥 Trending #3', '2026-08-01', null, 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&auto=format&fit=crop&q=80'),
-        new Movie('Game Changer', 155, 'Drama', 'U/A', '🗳️', 'Telugu, Tamil, Hindi', 200, 'An honest IAS officer takes on corrupt political systems to revolutionize democratic elections. Directed by S. Shankar, starring Ram Charan.', '⚡ New Release', '2026-08-01', null, 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=600&auto=format&fit=crop&q=80'),
-        new Movie('Stree 2', 147, 'Horror', 'U/A', '👻', 'Hindi, Telugu', 180, 'The town of Chanderi faces a new terrifying headless entity, Sarkata. The group must unite with Stree to save the town. Starring Shraddha Kapoor.', '😂 Blockbuster', '2026-08-01', null, 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop&q=80'),
-        new Movie('G.O.A.T: Greatest of All Time', 170, 'Sci-Fi', 'U/A', '🎯', 'Tamil, Telugu, Hindi', 210, 'An elite anti-terrorist squad agent is haunted by past missions, leading to high-octane action and clone mysteries. Starring Thalapathy Vijay.', '🔥 Mass Hit', '2026-08-01', null, 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80'),
-        new Movie('Deadpool & Wolverine', 128, 'Comedy', 'A', '⚔️', 'English, Telugu, Hindi', 240, 'Wolverine is recovering from his injuries when he crosses paths with the loudmouth Deadpool to defeat a common enemy.', '🍿 Global Hit', '2026-08-01', null, 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80'),
-        new Movie('Singham Again', 160, 'Action', 'U/A', '🦁', 'Hindi, Telugu', 190, 'Bajirao Singham leads the cop universe in an explosive fight against dangerous syndicate cartels. Starring Ajay Devgn & Ranveer Singh.', '💥 Action Spectacle', '2026-08-01', null, 'https://images.unsplash.com/photo-1533928298208-27ff66a55d8d?w=600&auto=format&fit=crop&q=80'),
-        new Movie('Vettaiyan', 162, 'Drama', 'U/A', '🕶️', 'Tamil, Telugu, Hindi', 200, 'A ruthless senior police officer fights against corruption and extrajudicial encounter setups. Starring Rajinikanth & Amitabh Bachchan.', '🔥 Superstar Hit', '2026-08-01', null, 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=600&auto=format&fit=crop&q=80')
+        new Movie('Kalki 2898 AD', 180, 'Sci-Fi', 'U/A', '⚡', 'Telugu, Hindi, English', 250, 'A modern avatar descends to earth in a futuristic dystopian era to save humanity from dark forces. Starring Prabhas, Amitabh Bachchan & Kamal Haasan.', '🔥 Trending #1', '2026-08-01', null, defaultPosters['Kalki 2898 AD']),
+        new Movie('Pushpa 2: The Rule', 165, 'Action', 'U/A', '🪓', 'Telugu, Hindi, Tamil', 220, 'The clash continues as Pushpa Raj expands his red sandalwood empire and asserts his dominance against SP Bhanwar Singh Shekhawat. Starring Allu Arjun.', '🔥 Trending #2', '2026-08-01', null, defaultPosters['Pushpa 2: The Rule']),
+        new Movie('Devara: Part 1', 158, 'Action', 'U/A', '🌊', 'Telugu, Hindi, Tamil', 200, 'An epic coastal saga of bravery, fearlessness, and loyalty set across treacherous seas. Starring NTR Jr, Saif Ali Khan & Janhvi Kapoor.', '🔥 Trending #3', '2026-08-01', null, defaultPosters['Devara: Part 1']),
+        new Movie('Game Changer', 155, 'Drama', 'U/A', '🗳️', 'Telugu, Tamil, Hindi', 200, 'An honest IAS officer takes on corrupt political systems to revolutionize democratic elections. Directed by S. Shankar, starring Ram Charan.', '⚡ New Release', '2026-08-01', null, defaultPosters['Game Changer']),
+        new Movie('Stree 2', 147, 'Horror', 'U/A', '👻', 'Hindi, Telugu', 180, 'The town of Chanderi faces a new terrifying headless entity, Sarkata. The group must unite with Stree to save the town. Starring Shraddha Kapoor.', '😂 Blockbuster', '2026-08-01', null, defaultPosters['Stree 2']),
+        new Movie('G.O.A.T: Greatest of All Time', 170, 'Sci-Fi', 'U/A', '🎯', 'Tamil, Telugu, Hindi', 210, 'An elite anti-terrorist squad agent is haunted by past missions, leading to high-octane action and clone mysteries. Starring Thalapathy Vijay.', '🔥 Mass Hit', '2026-08-01', null, defaultPosters['G.O.A.T: Greatest of All Time']),
+        new Movie('Deadpool & Wolverine', 128, 'Comedy', 'A', '⚔️', 'English, Telugu, Hindi', 240, 'Wolverine is recovering from his injuries when he crosses paths with the loudmouth Deadpool to defeat a common enemy.', '🍿 Global Hit', '2026-08-01', null, defaultPosters['Deadpool & Wolverine']),
+        new Movie('Singham Again', 160, 'Action', 'U/A', '🦁', 'Hindi, Telugu', 190, 'Bajirao Singham leads the cop universe in an explosive fight against dangerous syndicate cartels. Starring Ajay Devgn & Ranveer Singh.', '💥 Action Spectacle', '2026-08-01', null, defaultPosters['Singham Again']),
+        new Movie('Vettaiyan', 162, 'Drama', 'U/A', '🕶️', 'Tamil, Telugu, Hindi', 200, 'A ruthless senior police officer fights against corruption and extrajudicial encounter setups. Starring Rajinikanth & Amitabh Bachchan.', '🔥 Superstar Hit', '2026-08-01', null, defaultPosters['Vettaiyan'])
       ];
       this.saveMovies();
     }

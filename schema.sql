@@ -69,14 +69,14 @@ INSERT INTO users (id, name, email, password, phone, role) VALUES
 ON DUPLICATE KEY UPDATE name=VALUES(name);
 
 -- Default Movies
-INSERT INTO movies (id, title, duration, genre, rating, emoji, lang, base_price, description, trending_tag) VALUES
-('MOV-001', 'Kalki 2898 AD', 180, 'Sci-Fi', 'U/A', '⚡', 'Telugu, Hindi, English', 250.00, 'A modern avatar descends to earth in a futuristic dystopian era to save humanity from dark forces.', '🔥 Trending #1'),
-('MOV-002', 'Pushpa 2: The Rule', 165, 'Action', 'U/A', '🪓', 'Telugu, Hindi, Tamil', 220.00, 'The clash continues as Pushpa Raj expands his red sandalwood empire and asserts his dominance.', '🔥 Trending #2'),
-('MOV-003', 'Devara: Part 1', 158, 'Action', 'U/A', '🌊', 'Telugu, Hindi, Tamil', 200.00, 'An epic coastal saga of bravery, fearlessness, and loyalty set across treacherous seas.', '🔥 Trending #3'),
-('MOV-004', 'Game Changer', 155, 'Drama', 'U/A', '🗳️', 'Telugu, Tamil, Hindi', 200.00, 'An honest IAS officer takes on corrupt political systems to revolutionize democratic elections.', '⚡ New Release'),
-('MOV-005', 'Stree 2', 147, 'Horror', 'U/A', '👻', 'Hindi, Telugu', 180.00, 'The town of Chanderi faces a new terrifying headless entity, Sarkata.', '😂 Blockbuster'),
-('MOV-006', 'Deadpool & Wolverine', 128, 'Comedy', 'A', '⚔️', 'English, Telugu, Hindi', 240.00, 'Wolverine crosses paths with the loudmouth Deadpool to defeat a common enemy.', '🍿 Global Hit')
-ON DUPLICATE KEY UPDATE title=VALUES(title);
+INSERT INTO movies (id, title, duration, genre, rating, emoji, lang, base_price, description, trending_tag, image_url) VALUES
+('MOV-001', 'Kalki 2898 AD', 180, 'Sci-Fi', 'U/A', '⚡', 'Telugu, Hindi, English', 250.00, 'A modern avatar descends to earth in a futuristic dystopian era to save humanity from dark forces.', '🔥 Trending #1', 'https://upload.wikimedia.org/wikipedia/en/4/4c/Kalki_2898_AD.jpg'),
+('MOV-002', 'Pushpa 2: The Rule', 165, 'Action', 'U/A', '🪓', 'Telugu, Hindi, Tamil', 220.00, 'The clash continues as Pushpa Raj expands his red sandalwood empire and asserts his dominance.', '🔥 Trending #2', 'https://upload.wikimedia.org/wikipedia/en/1/11/Pushpa_2-_The_Rule.jpg'),
+('MOV-003', 'Devara: Part 1', 158, 'Action', 'U/A', '🌊', 'Telugu, Hindi, Tamil', 200.00, 'An epic coastal saga of bravery, fearlessness, and loyalty set across treacherous seas.', '🔥 Trending #3', 'https://upload.wikimedia.org/wikipedia/en/4/44/Devara_Poster.jpeg'),
+('MOV-004', 'Game Changer', 155, 'Drama', 'U/A', '🗳️', 'Telugu, Tamil, Hindi', 200.00, 'An honest IAS officer takes on corrupt political systems to revolutionize democratic elections.', '⚡ New Release', 'https://upload.wikimedia.org/wikipedia/en/6/6a/Game_Changer_Telugu.jpg'),
+('MOV-005', 'Stree 2', 147, 'Horror', 'U/A', '👻', 'Hindi, Telugu', 180.00, 'The town of Chanderi faces a new terrifying headless entity, Sarkata.', '😂 Blockbuster', 'https://upload.wikimedia.org/wikipedia/en/8/85/Stree_2_poster.jpeg'),
+('MOV-006', 'Deadpool & Wolverine', 128, 'Comedy', 'A', '⚔️', 'English, Telugu, Hindi', 240.00, 'Wolverine crosses paths with the loudmouth Deadpool to defeat a common enemy.', '🍿 Global Hit', 'https://upload.wikimedia.org/wikipedia/en/4/4c/Deadpool_%26_Wolverine_poster.jpg')
+ON DUPLICATE KEY UPDATE title=VALUES(title), image_url=VALUES(image_url);
 
 -- Default Theatres
 INSERT INTO theatres (id, name, location, city, distance, screens_count) VALUES
